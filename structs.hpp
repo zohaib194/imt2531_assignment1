@@ -17,6 +17,7 @@ struct Ghost
 
 struct World
 {
+    //std::vector<std::vector<unsigned int>> map;
 	unsigned int* map;
 };
 

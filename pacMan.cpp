@@ -1,5 +1,5 @@
 #include "globalVar.hpp"
-#include "struct.hpp"
+#include "structs.hpp"
 #include "template.hpp"
 
 int main()
