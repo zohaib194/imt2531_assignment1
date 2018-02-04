@@ -1,8 +1,14 @@
 
+CMakeFiles/
+CMakeCache.txt
+CMakeLists.txt
+cmake_install.cmake
+
 # Created by https://www.gitignore.io/api/visualstudio,visualstudiocode
 
 ### VisualStudioCode ###
 .vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
