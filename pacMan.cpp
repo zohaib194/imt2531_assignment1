@@ -1,16 +1,50 @@
 #include "structs.hpp"
 #include "globalVar.hpp"
+#include "template.hpp"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <../glew/glew.h>
 #include <../glfw/glfw3.h>
-#include <../glm/glm/glm.hpp>
 
 //holding the screen up
 #include <iostream>
 
-int main() {
+World w;
 
+void readFile() {
+	std::ifstream inputFile;
+	inputFile.open("../../imt2531_assignment1/levels/level0");
+	int x, y;
+	inputFile >> x; inputFile.ignore();
+	inputFile >> y;
+	// allocate memory for map
+	w.map = new unsigned int*[x];
+	for (int c = 0; c < x; c++) {
+		w.map[c] = new unsigned int[y];
+	}
+	while (!inputFile.eof()) {
+
+		// read the map data from file
+		for (int i = 0; i < x; i++) {
+			for (int j = 0; j < y; j++) {
+				inputFile >> w.map[i][j];
+			}
+			inputFile.ignore();
+		}
+	}
+	// display the map in commandline
+	for (int i = 0; i < x; i++) {
+		for (int j = 0; j < y; j++) {
+			std::cout << w.map[i][j];
+		}
+	}
+
+	inputFile.close();
+}
+
+
+int main() {
 	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW!");
 		return -1;
@@ -30,8 +64,13 @@ int main() {
 		return -1;
 	}
 	
-
 	
+	w.readFile();
+
+	// Display the map on window
+	GLuint vao;
+	//glBindVertexArray(vao);
+
 	std::cin >> score;
 	glfwDestroyWindow(window);
 	return 0;
