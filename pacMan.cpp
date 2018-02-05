@@ -1,10 +1,11 @@
 #include "structs.hpp"
 #include "globalVar.hpp"
+#include "template.hpp"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <../glew/glew.h>
 #include <../glfw/glfw3.h>
-#include <../glm/glm/glm.hpp>
 
 //holding the screen up
 #include <iostream>
@@ -30,6 +31,9 @@ int main() {
 		return -1;
 	}
 	
+	std::ifstream inputFile; 
+	inputFile.open("./levels/level0");
+
 
 	
 	std::cin >> score;
