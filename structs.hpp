@@ -23,8 +23,6 @@ public:
 	//std::vector<std::vector<unsigned int>> map;
 	unsigned int** map;
 
-	void readFile();
-	void draw();
 };
 
 struct Food
