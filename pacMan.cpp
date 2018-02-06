@@ -1,20 +1,19 @@
 #include "structs.hpp"
 #include "globalVar.hpp"
 #include "template.hpp"
+#include "Dependencies\glew\glew.h"
+#include "Dependencies\glfw\glfw3.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-#include <../glew/glew.h>
-#include <../glfw/glfw3.h>
-
-//holding the screen up
 #include <iostream>
 
 World w;
 
 void readFile() {
 	std::ifstream inputFile;
-	inputFile.open("../../imt2531_assignment1/levels/level0");
+	inputFile.open("levels/level0");
 	int x, y;
 	inputFile >> x; inputFile.ignore();
 	inputFile >> y;
@@ -65,10 +64,10 @@ int main() {
 	}
 	
 	
-	w.readFile();
+	readFile();
 
 	// Display the map on window
-	GLuint vao;
+//	GLuint vao;
 	//glBindVertexArray(vao);
 
 	std::cin >> score;
