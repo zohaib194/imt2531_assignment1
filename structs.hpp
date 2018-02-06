@@ -2,7 +2,7 @@
 
 struct PacMan
 {
-		
+
 };
 
 struct Ghost
