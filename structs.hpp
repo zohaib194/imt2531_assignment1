@@ -1,4 +1,4 @@
-#include <../glm/glm/glm.hpp>
+#include "glm/glm.hpp"
 //#include <glm/glm.hpp>
 #include <string>
 
@@ -20,6 +20,7 @@ class World
 {
 public:
 	//std::vector<std::vector<unsigned int>> map;
+	glm::vec2 size;
 	unsigned int** map;
 
 };

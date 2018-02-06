@@ -1,8 +1,8 @@
 #include "structs.hpp"
 #include "globalVar.hpp"
 #include "template.hpp"
-#include "Dependencies\glew\glew.h"
-#include "Dependencies\glfw\glfw3.h"
+#include "glew\glew.h"
+#include "glfw\glfw3.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,29 +15,30 @@ void readFile() {
 	std::ifstream inputFile;
 	inputFile.open("levels/level0");
 	int x, y;
-	inputFile >> x; inputFile.ignore();
-	inputFile >> y;
+	inputFile >> w.size.x; inputFile.ignore();
+	inputFile >> w.size.y;
 	// allocate memory for map
-	w.map = new unsigned int*[x];
-	for (int c = 0; c < x; c++) {
-		w.map[c] = new unsigned int[y];
+	w.map = new unsigned int*[w.size.x];
+	for (int c = 0; c < w.size.x; c++) {
+		w.map[c] = new unsigned int[w.size.y];
 	}
 	while (!inputFile.eof()) {
 
 		// read the map data from file
-		for (int i = 0; i < x; i++) {
-			for (int j = 0; j < y; j++) {
+		for (int i = 0; i < w.size.x; i++) {
+			for (int j = 0; j < w.size.y; j++) {
 				inputFile >> w.map[i][j];
 			}
 			inputFile.ignore();
 		}
 	}
 	// display the map in commandline
-	for (int i = 0; i < x; i++) {
-		for (int j = 0; j < y; j++) {
+	for (int i = 0; i < w.size.x; i++) {
+		for (int j = 0; j < w.size.y; j++) {
 			std::cout << w.map[i][j];
 		}
 	}
+	std::cout << w.size.x << "X" << w.size.y << "\n";
 
 	inputFile.close();
 }
