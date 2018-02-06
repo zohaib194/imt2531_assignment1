@@ -43,6 +43,7 @@ void readFile() {
 	inputFile.close();
 }
 
+void static_code(GLuint vao);
 
 int main() {
 	if (!glfwInit()) {
@@ -68,7 +69,7 @@ int main() {
 	readFile();
 
 	// Display the map on window
-//	GLuint vao;
+	GLuint vao;
 	//glBindVertexArray(vao);
 
 	std::cin >> score;
