@@ -1,8 +1,8 @@
 #include "structs.hpp"
 #include "globalVar.hpp"
 #include "template.hpp"
-#include "Dependencies\glew\glew.h"
-#include "Dependencies\glfw\glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,8 +1,8 @@
 #Files to be compiled
-OBJS = pacMan.cpps
+OBJS = pacMan.cpp
 
 #Compiler
-CC = gcc
+CC = g++
 
 #Compiler flags
 # -Wall 		Includes ALL warnings
@@ -17,7 +17,7 @@ CC = gcc
 CFLAGS = -Wall -g -ggdb
 
 #Linker flags
-LFLAGS = -lpthread
+LFLAGS = -lGL -lGLEW -lglfw
 # -L/usr/include/SFML 
 # -lSDL2 				Link to the SDL2 library
 # -lSDL2_image			Link to the SDL2_image library, needed for more advanced image file types
@@ -34,7 +34,7 @@ LFLAGS = -lpthread
 # -lpthread             Link to pthread library
 
 #Name of our exectuable
-OBJ_NAME = ./bin/pacMan
+OBJ_NAME = pacMan
 
 #This is the target that compiles our executable
 #Run with command: "make"
