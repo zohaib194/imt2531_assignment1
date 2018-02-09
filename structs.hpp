@@ -19,7 +19,7 @@ struct Ghost
 
 struct World
 {
-	std::vector<GLfloat> map;
+	std::vector<glm::vec3> map;
 	glm::vec2 size;
 //	unsigned int map[];
 

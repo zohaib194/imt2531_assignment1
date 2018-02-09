@@ -9,7 +9,7 @@
 
 World w;
 
-
+// Global varaibles
 
 void readFile() {
 	std::ifstream inputFile;
@@ -23,17 +23,17 @@ void readFile() {
 		for (int i = 0; i < w.size.x; i++) {
 			for (int j = 0; j < w.size.y; j++) {
 				inputFile >> x;
-				w.map.push_back(x);
+				w.map.push_back(glm::vec3((i * (2/w.size.x)) - 1, (j * (2/w.size.y) - 1), x));
 			}
 			inputFile.ignore();
 		}
 	}
 	// display the map in commandline
-	for (std::vector<int>::size_type i = 0; i < w.map.size(); i++) {
-		std::cout << w.map[i];
-	}
-	std::cout << w.size.x << "X" << w.size.y << "\n";
-	std::cout << w.map.size();
+/*	for (int i = 0; i < w.size.x * w.size.y; i++) {
+		std::cout << "i: " << w.map[i].x << " j: " <<  w.map[i].y << " value: " << w.map[i].z << '\n'; 
+	} */
+	//std::cout << w.size.x << "X" << w.size.y << "\n";
+	//std::cout << w.map.size();
 	inputFile.close();
 }
 
@@ -54,7 +54,7 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //	MacOs. 
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Old OpenGL is not acceptable.
 
-	window = glfwCreateWindow(height, width, "Pacman", NULL, NULL);
+	window = glfwCreateWindow(HEIGHT, WIDTH, "Pacman", NULL, NULL);
 	try {
 		if (window == NULL) {
 			glfwTerminate();
@@ -78,15 +78,12 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 		std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
 	}
 	
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSwapInterval(1);
-	const int size = w.map.size();
-	GLfloat mapVertices[1008];
 	
-	for (std::vector<GLfloat>::size_type i = 0; i < w.map.size(); i++) {
-		mapVertices[i] = w.map[i];
-	}
+	//const int size = w.map.size();
+	
 
+
+	
 	glGenVertexArrays(1, &vao);
 
 	glBindVertexArray(vao);
@@ -95,11 +92,15 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(mapVertices), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(w.map), NULL, GL_STATIC_DRAW);
 	
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(mapVertices), mapVertices);
+	// Transfer the map vertices position
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(w.map),	&w.map);
 
-	GLuint shaderProgram = create_program("./shaders/vertex.vert", "./shaders/fragment.frag");
+	// Transfer the vertex colors:
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(mapVertices), sizeof(mapColors), mapColors);
+
+	GLuint shaderProgram = create_program("./shaders/vertex.vert", "./shaders/fragment.frag", "./shaders/geometry.glsl");
 
 	GLint position = glGetAttribLocation(shaderProgram, "position");
 	
@@ -107,15 +108,21 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 	
 	glEnableVertexAttribArray(position);
 
-	glBindVertexArray(0);
+	// Color attribute
+//	GLint color = glGetAttribLocation(shaderProgram, "color");
+//	glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+//	glEnableVertexAttribArray(color);
+
+	//glBindVertexArray(0);
 
 }
+
 
 void display(GLuint &vao) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 12);
+	glDrawArrays(GL_POINT, 0, 1008);
 
 
 }
@@ -126,23 +133,28 @@ int main() {
 	readFile();
 	
 	setupOpengl(vao, vbo);
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSwapInterval(1);
 
 	glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 	// Display the map on window
 	do {
 		
+		//display(vao);
+		//glDisableVertexAttribArray(0);
 		display(vao);
 		glDisableVertexAttribArray(0);
-		
 		glfwSwapBuffers(window);
+
 		glfwPollEvents();
 
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
 
+
+
 	//glBindVertexArray(vao);
-	int i;
-	std::cin >> i;
+	
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
