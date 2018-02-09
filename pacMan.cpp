@@ -8,8 +8,14 @@
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 World w;
+Pacman pacman;
+
+Gluint textureMap;	// Texture for pacman and ghost
+
+void getTexture(Gluint* target, string relativeFilePath, Glenum outOfRangeBehaviour);
 
 void readFile() {
 	std::ifstream inputFile;
@@ -73,4 +79,18 @@ int main() {
 	std::cin >> score;
 	glfwDestroyWindow(window);
 	return 0;
+}
+
+void getTexture(Gluint* target, string relativeFilePath){
+
+	glGenTextures(1, target);
+	glBindTexture(GL_TEXTURE_2D, target)
+
+	Glfloat color[] = {1.0f, 0.0f, 0.0f, 0.0f }
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
 }

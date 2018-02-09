@@ -1,0 +1,2 @@
+#define Tutorial_VERSION_MAJOR @pacman_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @pacman_VERSION_MINOR@
