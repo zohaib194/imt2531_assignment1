@@ -22,17 +22,17 @@ void readFile() {
 
 	while (!inputFile.eof()) {
 		// read the map data from file
-		for (int i = 0; i < w.size.x; i++) {
-			for (int j = 0; j < w.size.y; j++) {
+		for (int i = 0; i < w.size.y; i++) {
+			for (int j = 0; j < w.size.x; j++) {
 				inputFile >> x;
-				w.map.push_back(glm::vec3((i * (2/w.size.x)) - 1, (j * (2/w.size.y) - 1), x));
+				w.map.push_back(glm::vec3((i * (2/w.size.y) - 1), (j * (2/w.size.x) - 1), x));
 			}
 			inputFile.ignore();
 		}
 	}
 	// display the map in commandline
-/*	for (int i = 0; i < w.size.x * w.size.y; i++) {
-		std::cout << "i: " << w.map[i].x << " j: " <<  w.map[i].y << " value: " << w.map[i].z << '\n'; 
+	/*for (int i = 0; i < w.size.x * w.size.y; i++) {
+		std::cout << "y: " << w.map[i].y << " x: " <<  w.map[i].x << " /*value: " << w.map[i].z << '\n'; 
 	} */
 	//std::cout << w.size.x << "X" << w.size.y << "\n";
 	//std::cout << w.map.size();
@@ -80,8 +80,7 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 		std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
 	}
 
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSwapInterval(1);
+
 	//const int size = w.map.size();
 
 
@@ -95,8 +94,63 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+	GLfloat* vertices_position;/*[] = {
+		0.1, 0.1,
+		0.5, 0.5,
+		0.1, 0.5,
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(w.map), &w.map, GL_STATIC_DRAW);
+		-0.1, 0.1,
+		-0.1, 0.5,
+		-0.5, 0.5,
+
+		0.1, -0.1,
+		0.1, -0.5,
+		0.5, -0.5,
+
+		-0.1, -0.1,
+		-0.5, -0.5,
+		-0.1, -0.5,
+	};*/
+
+	vertices_position = new GLfloat[w.size.x*w.size.y * 8];
+	
+	for (size_t i = 0; i < w.size.x*w.size.y; i++)
+	{
+		vertices_position[8 * i + 0] = w.map[i].x;
+		vertices_position[8 * i + 1] = w.map[i].y;
+
+		vertices_position[8 * i + 2] = w.map[i].x + (2 / w.size.x);
+		vertices_position[8 * i + 3] = w.map[i].y;
+
+		vertices_position[8 * i + 4] = w.map[i].x + (2 / w.size.x);
+		vertices_position[8 * i + 5] = w.map[i].y + (2 / w.size.y);
+
+		vertices_position[8 * i + 6] = w.map[i].x;
+		vertices_position[8 * i + 7] = w.map[i].y + (2 / w.size.y);
+	}
+	for (int k = 0; k < w.size.x*w.size.y * 2; k++) {
+		std::cout << vertices_position[k*2 + 0] << " " << vertices_position[k * 2 + 1] << "\n";
+	}
+	GLfloat colors[36];
+	srand(time(NULL));
+
+	// Fill colors with random numbers from 0 to 1, use continuous polynomials for r,g,b:
+	int k = 0;
+	for (int i = 0; i < sizeof(colors) / sizeof(float) / 3; ++i) {
+		float t = (float)rand() / (float)RAND_MAX;
+		colors[k] = 9 * (1 - t)*t*t*t;
+		k++;
+		colors[k] = 15 * (1 - t)*(1 - t)*t*t;
+		k++;
+		colors[k] = 8.5*(1 - t)*(1 - t)*(1 - t)*t;
+		k++;
+
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_position) + sizeof(colors), &vertices_position, GL_STATIC_DRAW);
+
+		// Transfer the vertex colors:
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices_position), sizeof(colors), colors);
 
 	// Transfer the vertex colors:
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(mapVertices), sizeof(mapColors), mapColors);
@@ -113,11 +167,9 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 
 
 	// Color attribute
-	GLint color_attribute = glGetUniformLocation(shaderProgram, "color");
-	if (color_attribute != -1) {
-		glUniform4d(color_attribute, 0.3, 0.4, 0.5, 0);
-	}
-	//glEnableVertexAttribArray(color_attribute);
+	GLint color_attribute = glGetAttribLocation(shaderProgram, "color");
+	glVertexAttribPointer(color_attribute, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *)sizeof(vertices_position));
+	glEnableVertexAttribArray(color_attribute);
 
 	//glBindVertexArray(0);
 
@@ -128,13 +180,7 @@ void display(GLuint &vao) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 12);
-	
-	glBindVertexArray(0);
-	glUseProgram(0);
-
-
-
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 }
 
 int main() {
@@ -143,13 +189,15 @@ int main() {
 	readFile();
 	
 	setupOpengl(vao, vbo);
-
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSwapInterval(1);
 
 	glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 	// Display the map on window
 	do {
 		
-		
+		//display(vao);
+		//glDisableVertexAttribArray(0);
 		display(vao);
 		glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
