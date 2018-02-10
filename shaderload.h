@@ -84,7 +84,7 @@ GLuint create_program(const char *path_vert_shader, const char *path_frag_shader
 		return shaderProgram;
 
 	} else {
-		// Load and compile the vertex and fragment shaders
+		// Load and compile the vertex, geometry and fragment shaders
 		GLuint vertexShader = load_and_compile_shader(path_vert_shader, GL_VERTEX_SHADER);
 		GLuint geometryShader = load_and_compile_shader(path_geom_shader, GL_GEOMETRY_SHADER);
 		GLuint fragmentShader = load_and_compile_shader(path_frag_shader, GL_FRAGMENT_SHADER);

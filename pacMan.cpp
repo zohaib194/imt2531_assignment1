@@ -43,14 +43,14 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 			throw 1;
 		}
 	}
-	catch (int e){
+	catch (int e) {
 		std::cout << "Failed to initialize GLFW! Exception nr: " << e << '\n';
 	}
 	// Window data
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); //	MacOs. 
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Old OpenGL is not acceptable.
 
@@ -77,25 +77,29 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 	catch (int e) {
 		std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
 	}
-	
-	
+
+
 	//const int size = w.map.size();
-	
 
 
-	
+
+
 	glGenVertexArrays(1, &vao);
 
 	glBindVertexArray(vao);
 
 	glGenBuffers(1, &vbo);
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(w.map), NULL, GL_STATIC_DRAW);
-	
+	glm::vec2 test[] = {
+		glm::vec2(-0.5, 0.5),
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(test[0]), &test[0], GL_STATIC_DRAW);
+
 	// Transfer the map vertices position
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(w.map),	&w.map);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(test[0]), &test[0]);
 
 	// Transfer the vertex colors:
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(mapVertices), sizeof(mapColors), mapColors);
@@ -104,9 +108,10 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 
 	GLint position = glGetAttribLocation(shaderProgram, "position");
 	
-	glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
-	
 	glEnableVertexAttribArray(position);
+
+	glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	
 
 	// Color attribute
 //	GLint color = glGetAttribLocation(shaderProgram, "color");
@@ -122,7 +127,11 @@ void display(GLuint &vao) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(vao);
-	glDrawArrays(GL_POINT, 0, 1008);
+		//glDrawArrays(GL_POINTS, 0, 1);
+		glUseProgram(0);
+	
+	glBindVertexArray(0);
+
 
 
 }
