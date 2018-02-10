@@ -10,18 +10,28 @@ out vec4 gColor;
 
 void main()
 {
+
+	for(int i = 0; i < 3; i++){
+		gl_Position = gl_in[i].gl_Position;
+		EmitVertex();
+	}
+
 /*
 	gl_Position = gl_in[0].gl_Position;
+	gColor = vColor;
 	EmitVertex();
 
 	gl_Position.x = gl_in[1].gl_Position.x + 0.5;
 	gl_Position.y = gl_in[1].gl_Position.y + 0.1;
+	gColor = vColor;
 	EmitVertex();
 
 	gl_Position.x = gl_in[2].gl_Position.x + 0.5;
 	gl_Position.y = gl_in[2].gl_Position.y - 0.1;
+	gColor = vColor;
 	EmitVertex();
 */
+/*
 	gl_Position = vec4(-0.5, 0.0, 0.0, 0.0);
 	gColor = vColor;
 	EmitVertex();
@@ -33,7 +43,7 @@ void main()
 	gl_Position = vec4(0.5, 0.0, 0.0, 0.0);
 	gColor = vColor;
 	EmitVertex();
-
+	*/
 	EndPrimitive();
  
  }

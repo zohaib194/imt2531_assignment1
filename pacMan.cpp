@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <time.h>
+
 World w;
 
 // Global varaibles
@@ -78,7 +80,8 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 		std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
 	}
 
-
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSwapInterval(1);
 	//const int size = w.map.size();
 
 
@@ -92,31 +95,29 @@ void setupOpengl(GLuint &vao, GLuint &vbo) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	glm::vec2 test[] = {
-		glm::vec2(-0.5, 0.5),
-	};
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(test[0]), &test[0], GL_STATIC_DRAW);
-
-	// Transfer the map vertices position
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(test[0]), &test[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(w.map), &w.map, GL_STATIC_DRAW);
 
 	// Transfer the vertex colors:
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(mapVertices), sizeof(mapColors), mapColors);
 
-	GLuint shaderProgram = create_program("./shaders/vertex.vert", "./shaders/fragment.frag", "./shaders/geometry.glsl");
+	GLuint shaderProgram = create_program("./shaders/vertex.vert", "./shaders/fragment.frag");
 
 	GLint position = glGetAttribLocation(shaderProgram, "position");
-	
-	glEnableVertexAttribArray(position);
 
 	glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	
+	glEnableVertexAttribArray(position);
+
+
+
 
 	// Color attribute
-//	GLint color = glGetAttribLocation(shaderProgram, "color");
-//	glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
-//	glEnableVertexAttribArray(color);
+	GLint color_attribute = glGetUniformLocation(shaderProgram, "color");
+	if (color_attribute != -1) {
+		glUniform4d(color_attribute, 0.3, 0.4, 0.5, 0);
+	}
+	//glEnableVertexAttribArray(color_attribute);
 
 	//glBindVertexArray(0);
 
@@ -127,10 +128,10 @@ void display(GLuint &vao) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(vao);
-		//glDrawArrays(GL_POINTS, 0, 1);
-		glUseProgram(0);
+	glDrawArrays(GL_TRIANGLES, 0, 12);
 	
 	glBindVertexArray(0);
+	glUseProgram(0);
 
 
 
@@ -142,15 +143,13 @@ int main() {
 	readFile();
 	
 	setupOpengl(vao, vbo);
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSwapInterval(1);
+
 
 	glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 	// Display the map on window
 	do {
 		
-		//display(vao);
-		//glDisableVertexAttribArray(0);
+		
 		display(vao);
 		glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
