@@ -1,5 +1,6 @@
 include/
 lib/
+SOIL/
 
 CMakeFiles/
 CMakeCache.txt
