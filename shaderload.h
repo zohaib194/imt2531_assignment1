@@ -3,7 +3,7 @@
 #include <iostream>
 #include <GL/glew.h>
 #include "GLFW/glfw3.h"
-#include "glm/glm/glm.hpp"
+#include "glm/glm.hpp"
 #include <vector>
 #include <fstream>
 using namespace glm;
@@ -12,7 +12,7 @@ using namespace glm;
 void read_shader_src(const char *fname, std::vector<char> &buffer) {
 	std::ifstream in;
 	in.open(fname, std::ios::binary);
-	
+
 	if (!in.fail()) {
 		// Get the number of bytes stored in this file
 		in.seekg(0, std::ios::end);
