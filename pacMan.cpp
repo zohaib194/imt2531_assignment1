@@ -18,6 +18,7 @@ GLuint vaoObj;
 GLuint vboObj; // [NUM_BUFFERS];
 
 World w;
+PacMan pm;
 
 // Global varaibles
 GLuint shaderProgram;
@@ -36,14 +37,16 @@ void readFile() {
             for (int j = 0; j < w.size.x; j++) {
                 inputFile >> x;
                 w.map.push_back(glm::vec3((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)), x));
+
+                // Find tile of type 2 and set it to pacmans starting pos
+                if (x == 2)
+                    pm.position = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
             }
             inputFile.ignore();
         }
     }
     inputFile.close();
 }
-
-
 
 void setupOpengl() {
     try {
