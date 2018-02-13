@@ -2,7 +2,7 @@
 #include "globalVar.hpp"
 #include "template.hpp"
 #include "shaderload.h"
-#include "SOIL\src\SOIL.h"
+#include "SOIL.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
@@ -128,8 +128,6 @@ void setupOpengl() {
 
     textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
 
-
-
 	// Load texture
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -141,9 +139,6 @@ void setupOpengl() {
 	image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	SOIL_free_image_data(image);
-
-
-
 
     glGenVertexArrays(1, &vaoMap);
 
