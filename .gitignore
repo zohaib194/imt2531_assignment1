@@ -1,3 +1,7 @@
+include/
+lib/
+SOIL/
+enc_temp_folder/
 
 CMakeFiles/
 CMakeCache.txt

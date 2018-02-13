@@ -1,5 +1,6 @@
-#include <../glm/glm/glm.hpp>
-//#include <glm/glm.hpp>
+#include "glm/glm.hpp"
+#include "GL/glew.h"
+#include <vector>
 #include <string>
 
 struct PacMan
@@ -16,11 +17,11 @@ struct Ghost
     glm::vec2 texCoord[4];
 };
 
-class World
+struct World
 {
-public:
-	//std::vector<std::vector<unsigned int>> map;
-	unsigned int** map;
+	std::vector<glm::vec3> map;
+	glm::vec2 size;
+//	unsigned int map[];
 
 };
 
