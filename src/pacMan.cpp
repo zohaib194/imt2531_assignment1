@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <time.h>
 
-enum { VB_POSITION, VB_COLOR, NUM_BUFFERS };
+enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
 
 GLuint vaoMap;
 GLuint vbo[NUM_BUFFERS];
@@ -131,15 +131,68 @@ void setupOpengl() {
 	// Load texture
 	GLuint texture;
 	glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glActiveTexture(GL_TEXTURE0);
 
-	int texWidth, texHeight;
+	int texWidth, texHeight;//, numComponents;
 	unsigned char* image;
 	image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);
+	SOIL_free_image_data(image); 
+	//std::cout << texHeight << " " << texWidth << " " << numComponents << '\n';
 
+	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	// vertices for pacman
+	glm::vec2 pacman_vertices[] = {
+		glm::vec2(pm.position.x, pm.position.y),
+		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
+		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y),
+		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
+		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y) ,
+		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y)*15),
+	};
+
+	/*	
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),  */
+
+
+	/*
+	glm::vec2(0.0f, 0.0f),
+	glm::vec2(0.0f, float(1 / 4)),
+	glm::vec2(float(1 / 6), 0.0f),
+	glm::vec2(0.0f, float(1 / 4)),
+	glm::vec2(float(1 / 6), 0.0f),
+	glm::vec2(float(1 / 4), float(1 / 6)),
+	*/
+	/*
+			glm::vec2(0.0f, 0.0f),
+		glm::vec2(0.0f, 0.5f),
+		glm::vec2(0.5f, 0.0f),
+		glm::vec2(0.0f, 0.5f),
+		glm::vec2(0.5f, 0.0f),
+		glm::vec2(0.5f, 0.5f),
+	*/
+	glm::vec2 texCoord[] = {
+        glm::vec2(0.0f, 0.0f),
+        glm::vec2(0.0f, 1.0f),
+        glm::vec2(1.0f, 0.0f),
+        glm::vec2(0.0f, 1.0f),
+        glm::vec2(1.0f, 0.0f),
+        glm::vec2(1.0f, 1.0f),
+	};
+	
     glGenVertexArrays(1, &vaoMap);
 
     glBindVertexArray(vaoMap);
@@ -151,7 +204,7 @@ void setupOpengl() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo[VB_POSITION]);
 
     // Put the given data in buffer
-    glBufferData(GL_ARRAY_BUFFER, w.size.x * w.size.y * 6 * 16, &vertices_position[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, w.size.x * w.size.y * 6 * 2 * sizeof(glm::vec2), &vertices_position[0], GL_STATIC_DRAW);
 
     // Enable buffer 'VB_POSITION' for use
     glEnableVertexAttribArray(VB_POSITION);
@@ -172,6 +225,8 @@ void setupOpengl() {
     // Tell OpenGL how to use the enabled buffer
     glVertexAttribPointer(VB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
+	/* PACMAN, GHOSTS and Special food*/
+
     glGenVertexArrays(1, &vaoObj);
 
     glBindVertexArray(vaoObj);
@@ -183,14 +238,21 @@ void setupOpengl() {
     glBindBuffer(GL_ARRAY_BUFFER, vboObj);
 
     // Put the given data in buffer
-    glBufferData(GL_ARRAY_BUFFER, w.size.x * w.size.y * 6 * 16, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
 
-    // Enable buffer 'VB_POSITION' for use
-    glEnableVertexAttribArray(0);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacman_vertices), &pacman_vertices);
+	
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
 
-    // Tell OpenGL how to use the enabled buffer
-    glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	// Enable buffer 'VB_POSITION' for use
+	glEnableVertexAttribArray(VB_POSITION);
 
+	// Tell OpenGL how to use the enabled buffer
+	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glEnableVertexAttribArray(VB_TEXTURE);
+
+	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, 0, (void *)sizeof(pacman_vertices));
 
 }
 
@@ -201,11 +263,16 @@ void display() {
     glUseProgram(shaderProgram);
     glBindVertexArray(vaoMap);
 
-    //glDrawElements(GL_TRIANGLES, 200, GL_UNSIGNED_INT, indices);
-    //glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+
 
     // GL_TRIANGLE_STRIP WAS THE PROBLEM
     glDrawArrays(GL_TRIANGLES, 0, 6 * w.size.x * w.size.y);
+
+	glUseProgram(textureShaderProg);
+
+	glBindVertexArray(vaoObj);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
     glBindVertexArray(0);
     glUseProgram(0);

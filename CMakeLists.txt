@@ -72,7 +72,7 @@ else()
 endif()
 #file (GLOB         PROJECT_DLL dll/glew32.dll)
 
-include_directories(${PROJECT_SOURCE_DIR}/include/)
+include_directories(${PROJECT_SOURCE_DIR}/headers/)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/GLFW/include/)
 include_directories(${PROJECT_SOURCE_DIR}/SOIL/src/)
@@ -88,7 +88,7 @@ file(COPY ${PROJECT_SHADERS} DESTINATION ${PROJECT_SOURCE_DIR})
 #file(COPY  ${PROJECT_SOURCE_DIR}/shaders/fragment.frag DESTINATION ${PROJECT_BINARY_DIR})
 
 if(WINDOWS)
-include_directories(${PROJECT_SOURCE_DIR}/glew/include/)
+include_directories(${PROJECT_SOURCE_DIR}/glew/headers/)
 
 file(COPY  ${PROJECT_SOURCE_DIR}/dll/glew32.dll DESTINATION ${PROJECT_BINARY_DIR})
 endif(WINDOWS)
