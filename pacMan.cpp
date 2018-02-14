@@ -29,6 +29,13 @@ GLuint textureShaderProg;
 
 float dt = 0.0f;
 
+// Function declarations
+void readFile();
+void setupOpengl();
+void display();
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 void readFile() {
     std::ifstream inputFile;
     inputFile.open("levels/level0");
@@ -132,17 +139,17 @@ void setupOpengl() {
 
     textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
 
-	// Load texture
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+    // Load texture
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-	int texWidth, texHeight;
-	unsigned char* image;
-	image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);
+    int texWidth, texHeight;
+    unsigned char* image;
+    image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    SOIL_free_image_data(image);
 
     glGenVertexArrays(1, &vaoMap);
 
@@ -194,8 +201,6 @@ void setupOpengl() {
 
     // Tell OpenGL how to use the enabled buffer
     glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-
 }
 
 
@@ -255,7 +260,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         pm.position += pm.direction * dt;
         std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
     }
+    else if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        // Register a keyboard event callback function
+        glfwSetKeyCallback(window, pause_callback);
+    }
+}
 
+void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        // Register a keyboard event callback function
+        glfwSetKeyCallback(window, key_callback);
+    }
 }
 
 int main() {
@@ -273,6 +291,7 @@ int main() {
     do {
         //glDisableVertexAttribArray(0);
         glfwPollEvents();
+
 
         glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 
