@@ -12,6 +12,8 @@
 
 enum { VB_POSITION, VB_COLOR, NUM_BUFFERS };
 
+bool shouldRun = true;
+
 GLuint vaoMap;
 GLuint vbo[NUM_BUFFERS];
 
@@ -24,6 +26,8 @@ PacMan pm;
 // Global varaibles
 GLuint shaderProgram;
 GLuint textureShaderProg;
+
+float dt = 0.0f;
 
 void readFile() {
     std::ifstream inputFile;
@@ -103,7 +107,7 @@ void setupOpengl() {
 
     for (size_t i = 0; i < w.size.x * w.size.y; i++)
     {
-        tileColor = ((w.map[i].z < 1) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+        tileColor = ((w.map[i].z < 1 || w.map[i].z == 2) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
         vertices_position[6 * i + 0] = glm::vec2(w.map[i].x, w.map[i].y);
         vertices_color[6 * i + 0] = tileColor;
@@ -211,29 +215,75 @@ void display() {
     glUseProgram(0);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        shouldRun = false;
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(0.0f, pm.speed);
 
+        // Move pacman a little in that direction
+        pm.position += pm.direction * dt;
+        std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+    {
+        // Set direction to down
+        pm.direction = glm::vec2(0.0f, -pm.speed);
 
+        // Move pacman a little in that direction
+        pm.position += pm.direction * dt;
+        std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(-pm.speed, 0.0f);
+
+        // Move pacman a little in that direction
+        pm.position += pm.direction * dt;
+        std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(pm.speed, 0.0f);
+
+        // Move pacman a little in that direction
+        pm.position += pm.direction * dt;
+        std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
+    }
+
+}
 
 int main() {
     readFile();
 
     setupOpengl();
+
+    // Register a keyboard event callback function
+    glfwSetKeyCallback(window, key_callback);
+
+    // Get time at start
+    dt = glfwGetTime();
+
     // Display the map on window	
-
     do {
-
         //glDisableVertexAttribArray(0);
         glfwPollEvents();
 
         glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 
+        // Get elapsed time
+        dt = glfwGetTime() - dt;
         display();
 
         glfwSwapBuffers(window);
+        dt = glfwGetTime();
 
-
-    } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-        glfwWindowShouldClose(window) == 0);
+    } while (shouldRun && glfwWindowShouldClose(window) == 0);
 
 
     glfwDestroyWindow(window);
