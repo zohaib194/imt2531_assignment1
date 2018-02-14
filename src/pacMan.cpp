@@ -2,7 +2,7 @@
 #include "globalVar.hpp"
 #include "template.hpp"
 #include "shaderload.h"
-#include "SOIL.h"
+#include "SOIL/src/SOIL.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
@@ -98,8 +98,8 @@ void setupOpengl() {
 
     glm::vec4 tileColor;
 
-    vertices_position = new glm::vec2[w.size.x * w.size.y * 6];
-    vertices_color = new glm::vec4[w.size.x * w.size.y * 6];
+    vertices_position = new glm::vec2[int(w.size.x * w.size.y * 6)];
+    vertices_color = new glm::vec4[int(w.size.x * w.size.y * 6)];
 
     for (size_t i = 0; i < w.size.x * w.size.y; i++)
     {
