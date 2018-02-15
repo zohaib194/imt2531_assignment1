@@ -3,7 +3,7 @@
 template <class T>
 glm::vec4 collision(T obj)
 {
-    int i = (obj.position.y / (2 / w.size.y)) - 1, j = (obj.position.x / (2 / w.size.x)) + 1;
+    int i = (obj.position[0].y / (2 / w.size.y)) - 1, j = (obj.position[0].x / (2 / w.size.x)) + 1;
     return glm::vec4((w.map[int((j    ) * w.size.x + (i - 1))].z == 1),
                      (w.map[int((j + 1) * w.size.x + (i    ))].z == 1),
                      (w.map[int((j    ) * w.size.x + (i + 1))].z == 1),

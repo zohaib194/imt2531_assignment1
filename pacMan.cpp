@@ -22,6 +22,7 @@ GLuint vbo[NUM_BUFFERS];
 GLuint vaoObj;
 GLuint veoObj;
 GLuint vboObj; // [NUM_BUFFERS];
+GLuint texture;
 
 World w;
 PacMan pm;
@@ -57,7 +58,7 @@ void readFile() {
 
 				// Find tile of type 2 and set it to pacmans starting pos
 				if (x == 2)
-					pm.position = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
+					pm.position[0] = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
 			}
 			inputFile.ignore();
 		}
@@ -149,7 +150,7 @@ void setupOpengl() {
 	textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
 
 	// Load texture
-	GLuint texture;
+
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -179,29 +180,15 @@ void setupOpengl() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-	// vertices for pacman
-	glm::vec2 pacman_vertices[] = {
-		glm::vec2(pm.position.x, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y - (2 / w.size.y) * 15),
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y - (2 / w.size.y) * 15),
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y) ,
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y - (2 / w.size.y) * 15),
-	};
+	pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
+	pm.texCoord[1] = glm::vec2(0.02f, 0.245f);
+	pm.texCoord[2] = glm::vec2(0.15f, 0.03f);
+	pm.texCoord[3] = glm::vec2(0.15f, 0.245f);
 
-	GLfloat texVertices[] = {
-			// pacman position			colors			texture coord
-		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.02f, 0.03f,													// 0,1
-		pm.position.x,  pm.position.y - (2 / w.size.y), 1.0f, 1.0f, 1.0f, 0.02f, 0.245f,								// 0,0
-		pm.position.x + (2 / w.size.y), pm.position.y, 1.0f, 1.0f, 1.0f, 0.15f, 0.03f,								// 1,1
-		pm.position.x + (2 / w.size.y),  pm.position.y - (2 / w.size.y), 1.0f, 1.0f, 1.0f,  0.15f, 0.245f,		// 1,0
-	};
 
-	GLuint order[] = {
-		0, 1, 2,
-		1, 2, 3
-	};
-
+	pm.position[1] = glm::vec2(pm.position[0].x, pm.position[0].y - (2 / w.size.y));
+	pm.position[2] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y);
+	pm.position[3] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y - (2 / w.size.y));
 
 	glGenVertexArrays(1, &vaoMap);
 
@@ -235,57 +222,72 @@ void setupOpengl() {
 	// Tell OpenGL how to use the enabled buffer
 	glVertexAttribPointer(VB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	/* PACMAN, GHOSTS and Special food*/
+
 
 	glGenVertexArrays(1, &vaoObj);
-
 	glBindVertexArray(vaoObj);
 
 	glGenBuffers(1, &vboObj);
 
+
+}
+
+void dynamic_code(){
+	
+	/* PACMAN, GHOSTS and Special food*/
+
+	GLfloat pacmanData[] = {
+		// pacman position			colors			texture coord
+		pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x, pm.texCoord[0].y,													// 0,1
+		pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x, pm.texCoord[1].y,								// 0,0
+		pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x, pm.texCoord[2].y,								// 1,1
+		pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x, pm.texCoord[3].y,		// 1,0
+	};
+
+	GLuint order[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+
+	
 	glBindBuffer(GL_ARRAY_BUFFER, vboObj);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texVertices), NULL, GL_STATIC_DRAW);
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texVertices), &texVertices);
-
-
+	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pacmanData), NULL, GL_STATIC_DRAW);
+	
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacmanData), &pacmanData);
+	
+	
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
-
-
+	
+	
 	glGenBuffers(1, &veoObj);
-
+	
 	// !!!! Make a buffer for VERTEX POSITIONS !!!!
 	// Bind the buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
-
+	
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 2, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
-
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);	
+	
 
 	// Put the given data in buffer
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
 
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacman_vertices), &pacman_vertices);
-
-	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
-
-
-
 	// Enable buffer 'VB_POSITION' for use
 	glEnableVertexAttribArray(VB_POSITION);
-
+	
 	// Tell OpenGL how to use the enabled buffer
 	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
-
+	
 	glEnableVertexAttribArray(VB_COLOR);
-
+	
 	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
-
+	
 	glEnableVertexAttribArray(VB_TEXTURE);
-
+	
 	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 }
+
 
 
 void display() {
@@ -379,6 +381,10 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
     }
 }
 
+
+
+
+
 int main() {
 
     // Read map data from file
@@ -403,6 +409,8 @@ int main() {
 
 		glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 
+		dynamic_code();
+
         // Get elapsed time
         dt = glfwGetTime();
 
@@ -415,9 +423,13 @@ int main() {
                 (!coll.x) && pm.direction.x < 0 ||
                 (!coll.y) && pm.direction.x > 0)
             {
-                // Move pacman a little in forward
-                pm.position += pm.direction * dt;
-                std::cout << "PM pos: " << "(" << pm.position.x << ", " << pm.position.y << "). dt = " << dt << "\n";
+                // Move pacman a little in that direction
+                pm.position[0] += pm.direction * dt;
+                pm.position[1] += pm.direction * dt;
+                pm.position[2] += pm.direction * dt;
+                pm.position[3] += pm.direction * dt;
+
+                std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
             }
 
             // TODO: add ghost movement update here as well (copy and modify code above)
