@@ -3,7 +3,8 @@
 #include "template.hpp"
 #include "shaderload.h"
 #include "SOIL.h"
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
@@ -17,6 +18,7 @@ GLuint vaoMap;
 GLuint vbo[NUM_BUFFERS];
 
 GLuint vaoObj;
+GLuint veoObj;
 GLuint vboObj; // [NUM_BUFFERS];
 
 World w;
@@ -109,19 +111,19 @@ void setupOpengl() {
         vertices_position[6 * i + 0] = glm::vec2(w.map[i].x, w.map[i].y);
         vertices_color[6 * i + 0] = tileColor;
 
-        vertices_position[6 * i + 1] = glm::vec2(w.map[i].x, w.map[i].y + (2 / w.size.y));
+        vertices_position[6 * i + 1] = glm::vec2(w.map[i].x, w.map[i].y - (2 / w.size.y));
         vertices_color[6 * i + 1] = tileColor;
 
         vertices_position[6 * i + 2] = glm::vec2(w.map[i].x + (2 / w.size.x), w.map[i].y);
         vertices_color[6 * i + 2] = tileColor;
 
-        vertices_position[6 * i + 3] = glm::vec2(w.map[i].x, w.map[i].y + (2 / w.size.y));
+        vertices_position[6 * i + 3] = glm::vec2(w.map[i].x, w.map[i].y - (2 / w.size.y));
         vertices_color[6 * i + 3] = tileColor;
 
         vertices_position[6 * i + 4] = glm::vec2(w.map[i].x + (2 / w.size.x), w.map[i].y);
         vertices_color[6 * i + 4] = tileColor;
 
-        vertices_position[6 * i + 5] = glm::vec2(w.map[i].x + (2 / w.size.x), w.map[i].y + (2 / w.size.y));
+        vertices_position[6 * i + 5] = glm::vec2(w.map[i].x + (2 / w.size.x), w.map[i].y - (2 / w.size.y));
         vertices_color[6 * i + 5] = tileColor;
     }
 
@@ -135,12 +137,15 @@ void setupOpengl() {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE0);
 
-	int texWidth, texHeight, numComponents;
+	int texWidth, texHeight;// , numComponents;
 	unsigned char* image;
-	image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
+	//image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
+	image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
+	//stbi_set_flip_vertically_on_load(1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	stbi_image_free(image); 
-	std::cout << texHeight << " " << texWidth << " " << numComponents << '\n';
+	//stbi_image_free(image); 
+	SOIL_free_image_data(image);
+	//std::cout << texHeight << " " << texWidth << " " << numComponents << '\n';
 
 	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
 
@@ -160,41 +165,18 @@ void setupOpengl() {
 		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y)*15),
 	};
 
-	/*	
-		glm::vec2(0.0f, 0.0f),
-		glm::vec2(0.0f, 1.0f),
-		glm::vec2(1.0f, 0.0f),
-		glm::vec2(0.0f, 1.0f),
-		glm::vec2(1.0f, 0.0f),
-		glm::vec2(1.0f, 1.0f),  */
-
-
-	/*
-	glm::vec2(0.0f, 0.0f),
-	glm::vec2(0.0f, float(1 / 4)),
-	glm::vec2(float(1 / 6), 0.0f),
-	glm::vec2(0.0f, float(1 / 4)),
-	glm::vec2(float(1 / 6), 0.0f),
-	glm::vec2(float(1 / 4), float(1 / 6)),
-	*/
-	/*
-			glm::vec2(0.0f, 0.0f),
-		glm::vec2(0.0f, 0.5f),
-		glm::vec2(0.5f, 0.0f),
-		glm::vec2(0.0f, 0.5f),
-		glm::vec2(0.5f, 0.0f),
-		glm::vec2(0.5f, 0.5f),
-	*/
-	glm::vec2 texCoord[] = {
-		glm::vec2(0.0f, 1.0f),	//top left
-		glm::vec2(0.0f, 0.0f),	//top right
-		glm::vec2(1.0f, 1.0f),	//lower right
-		glm::vec2(0.0f, 1.0f),	//top left
-		glm::vec2(0.0f, 0.0f),	//lower right
-		glm::vec2(1.0f, 1.0f),	//lower left
-
-
+	GLfloat texVertices[] = {
+		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.025f, 1.0f,													// 0,1
+		pm.position.x,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.0f, 0.1f,								// 0,0
+		pm.position.x + (2 / w.size.y) * 15, pm.position.y, 1.0f, 1.0f, 1.0f, 0.1f, 1.0f,								// 1,0
+		pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f,		// 1,1
 	};
+
+	GLuint order[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+
 	
     glGenVertexArrays(1, &vaoMap);
 
@@ -207,7 +189,7 @@ void setupOpengl() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo[VB_POSITION]);
 
     // Put the given data in buffer
-    glBufferData(GL_ARRAY_BUFFER, w.size.x * w.size.y * 6 * 2 * sizeof(glm::vec2), &vertices_position[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, w.size.x * w.size.y * 6 * sizeof(glm::vec2), &vertices_position[0], GL_STATIC_DRAW);
 
     // Enable buffer 'VB_POSITION' for use
     glEnableVertexAttribArray(VB_POSITION);
@@ -236,26 +218,48 @@ void setupOpengl() {
 
     glGenBuffers(1, &vboObj);
 
+	glBindBuffer(GL_ARRAY_BUFFER, vboObj);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(texVertices), NULL, GL_STATIC_DRAW);
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texVertices), &texVertices);
+
+
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
+
+
+	glGenBuffers(1, &veoObj);
+
     // !!!! Make a buffer for VERTEX POSITIONS !!!!
     // Bind the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vboObj);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
 
-    // Put the given data in buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*3*2, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacman_vertices), &pacman_vertices);
 	
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
+    // Put the given data in buffer
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
+
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacman_vertices), &pacman_vertices);
+	
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
+
+	
 
 	// Enable buffer 'VB_POSITION' for use
 	glEnableVertexAttribArray(VB_POSITION);
 
 	// Tell OpenGL how to use the enabled buffer
-	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+
+	glEnableVertexAttribArray(VB_COLOR);
+
+	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
 
 	glEnableVertexAttribArray(VB_TEXTURE);
 
-	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, 0, (void *)sizeof(pacman_vertices));
+	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 
 }
 
@@ -273,9 +277,24 @@ void display() {
 
 	glUseProgram(textureShaderProg);
 
-	glBindVertexArray(vaoObj);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	//glBindVertexArray(vaoObj);
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//glBindVertexArray(0);
+
+	glBindVertexArray(vaoObj);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
+	
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
     glUseProgram(0);
@@ -310,3 +329,82 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
+
+
+
+/*
+glm::vec2(0.0f, 0.0f),
+glm::vec2(0.0f, 1.0f),
+glm::vec2(1.0f, 0.0f),
+glm::vec2(0.0f, 1.0f),
+glm::vec2(1.0f, 0.0f),
+glm::vec2(1.0f, 1.0f),  */
+
+
+/*
+glm::vec2(0.0f, 0.0f),
+glm::vec2(0.0f, float(1 / 4)),
+glm::vec2(float(1 / 6), 0.0f),
+glm::vec2(0.0f, float(1 / 4)),
+glm::vec2(float(1 / 6), 0.0f),
+glm::vec2(float(1 / 4), float(1 / 6)),
+*/
+/*
+glm::vec2(0.0f, 0.0f),
+glm::vec2(0.0f, 0.5f),
+glm::vec2(0.5f, 0.0f),
+glm::vec2(0.0f, 0.5f),
+glm::vec2(0.5f, 0.0f),
+glm::vec2(0.5f, 0.5f),
+*/
+
+
+// this one is working
+/*
+glm::vec2(0.0f, 1.0f),	//top left
+glm::vec2(0.0f, 0.0f),	//top right
+glm::vec2(1.0f, 1.0f),	//lower right
+
+
+glm::vec2(0.0f, 0.0f),	//lower right
+glm::vec2(1.0f, 1.0f),	//lower left
+
+glm::vec2(1.0f, 0.0f),	//top left
+
+
+*/
+/*	glm::vec2(0.0f, 0.25f),	//lower left -> top left
+glm::vec2(0.0f, 0.0f),	//top left -> lower left
+glm::vec2(0.3f, 0.3f),	//lower right -> top right
+
+
+glm::vec2(0.0f, 0.0f),	//top-left -> lower left
+glm::vec2(0.3f, 0.3f),	//lower right -> top right
+glm::vec2(0.3f, 0.0f),	//top right -> lower right
+
+glm::vec2(0.0f, 0.5f),	//lower left -> top left
+glm::vec2(0.5f, 0.5f),	//top left -> lower left
+glm::vec2(0.0f, 1.0f),	//lower right -> top right
+
+
+glm::vec2(0.5f, 0.5f),	//top-left -> lower left
+glm::vec2(0.0f, 1.0f),	//lower right -> top right
+glm::vec2(0.5f, 1.0f),	//top right -> lower right
+*/
+
+/*
+
+glm::vec2 texCoord[] = {
+	// coord		texture
+	glm::vec2(0.0f, 0.0f),	//lower left -> top left
+	glm::vec2(0.0f, 1.0f),	//top left -> lower left
+	glm::vec2(1.0f, 0.0f),	//lower right -> top right
+
+
+	glm::vec2(0.0f, 1.0f),	//top-left -> lower left
+	glm::vec2(1.0f, 0.0f),	//lower right -> top right
+	glm::vec2(1.0f, 1.0f),	//top right -> lower right
+};
+
+*/
