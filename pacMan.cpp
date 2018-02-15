@@ -169,19 +169,19 @@ void setupOpengl() {
 	// vertices for pacman
 	glm::vec2 pacman_vertices[] = {
 		glm::vec2(pm.position.x, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
+		glm::vec2(pm.position.x,  pm.position.y - (2 / w.size.y) * 15),
 		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
+		glm::vec2(pm.position.x,  pm.position.y - (2 / w.size.y) * 15),
 		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y) ,
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15),
+		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y - (2 / w.size.y) * 15),
 	};
 
 	GLfloat texVertices[] = {
 			// pacman position			colors			texture coord
 		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.02f, 0.03f,													// 0,1
-		pm.position.x,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.02f, 0.24f,								// 0,0
-		pm.position.x + (2 / w.size.y) * 15, pm.position.y, 1.0f, 1.0f, 1.0f, 0.12929f, 0.03f,								// 1,1
-		pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f,  0.12929f, 0.24f,		// 1,0
+		pm.position.x,  pm.position.y - (2 / w.size.y), 1.0f, 1.0f, 1.0f, 0.02f, 0.245f,								// 0,0
+		pm.position.x + (2 / w.size.y), pm.position.y, 1.0f, 1.0f, 1.0f, 0.15f, 0.03f,								// 1,1
+		pm.position.x + (2 / w.size.y),  pm.position.y - (2 / w.size.y), 1.0f, 1.0f, 1.0f,  0.15f, 0.245f,		// 1,0
 	};
 
 	GLuint order[] = {
