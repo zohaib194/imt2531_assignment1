@@ -123,7 +123,7 @@ void setupOpengl() {
 
 	for (size_t i = 0; i < w.size.x * w.size.y; i++)
 	{
-		tileColor = ((w.map[i].z < 1) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		tileColor = ((w.map[i].z < 1 || w.map[i].z == 2) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 		vertices_position[6 * i + 0] = glm::vec2(w.map[i].x, w.map[i].y);
 		vertices_color[6 * i + 0] = tileColor;
@@ -331,28 +331,28 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         shouldRun = false;
 
     // Can pacman move up AND was UP or W pressed?
-    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && coll.y)
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && (!coll.y))
     {
         // Set direction to up
         pm.direction = glm::vec2(0.0f, pm.speed);
     }
 
     // Can pacman move down AND was DOWN or S pressed?
-    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && coll.w)
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && (!coll.w))
     {
         // Set direction to down
         pm.direction = glm::vec2(0.0f, -pm.speed);
     }
 
     // Can pacman move left AND was LEFT or A pressed?
-    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && coll.x)
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && (!coll.x))
     {
         // Set direction to left
         pm.direction = glm::vec2(-pm.speed, 0.0f);
     }
 
     // Can pacman move right AND was RIGHT or D pressed?
-    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && coll.z)
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && (!coll.z))
     {
         // Set direction to right
         pm.direction = glm::vec2(pm.speed, 0.0f);
