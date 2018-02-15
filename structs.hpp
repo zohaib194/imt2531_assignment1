@@ -5,14 +5,15 @@
 
 struct PacMan
 {
-	glm::vec2 position; 
+	glm::vec2 position[4]; 
     glm::vec2 direction;
     glm::vec2 texCoord[4];
+    float speed = 2.0f;
 };
 
 struct Ghost
 {
-	glm::vec2 position; 
+	glm::vec2 position[4]; 
     glm::vec2 direction;
     glm::vec2 texCoord[4];
 };

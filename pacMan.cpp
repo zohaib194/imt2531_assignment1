@@ -14,12 +14,15 @@
 
 enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
 
+bool shouldRun = true;
+
 GLuint vaoMap;
 GLuint vbo[NUM_BUFFERS];
 
 GLuint vaoObj;
 GLuint veoObj;
 GLuint vboObj; // [NUM_BUFFERS];
+GLuint texture;
 
 World w;
 PacMan pm;
@@ -27,6 +30,15 @@ PacMan pm;
 // Global varaibles
 GLuint shaderProgram;
 GLuint textureShaderProg;
+
+float dt = 0.0f;
+
+// Function declarations
+void readFile();
+void setupOpengl();
+void display();
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 void readFile() {
 	std::ifstream inputFile;
@@ -44,7 +56,7 @@ void readFile() {
 
 				// Find tile of type 2 and set it to pacmans starting pos
 				if (x == 2)
-					pm.position = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
+					pm.position[0] = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
 			}
 			inputFile.ignore();
 		}
@@ -105,12 +117,12 @@ void setupOpengl() {
 
 	glm::vec4 tileColor;
 
-	vertices_position = new glm::vec2[w.size.x * w.size.y * 6];
-	vertices_color = new glm::vec4[w.size.x * w.size.y * 6];
+	vertices_position = new glm::vec2[int(w.size.x * w.size.y * 6)];
+	vertices_color = new glm::vec4[int(w.size.x * w.size.y * 6)];
 
 	for (size_t i = 0; i < w.size.x * w.size.y; i++)
 	{
-		tileColor = ((w.map[i].z < 1) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		tileColor = ((w.map[i].z < 1 || w.map[i].z == 2) ? glm::vec4(0.98f, 0.15f, 0.45f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
 		vertices_position[6 * i + 0] = glm::vec2(w.map[i].x, w.map[i].y);
 		vertices_color[6 * i + 0] = tileColor;
@@ -136,7 +148,7 @@ void setupOpengl() {
 	textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
 
 	// Load texture
-	GLuint texture;
+
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -166,29 +178,15 @@ void setupOpengl() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-	// vertices for pacman
-	glm::vec2 pacman_vertices[] = {
-		glm::vec2(pm.position.x, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y),
-		glm::vec2(pm.position.x,  pm.position.y + (2 / w.size.y) * 15),
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15, pm.position.y) ,
-		glm::vec2(pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15),
-	};
+	pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
+	pm.texCoord[1] = glm::vec2(0.02f, 0.245f);
+	pm.texCoord[2] = glm::vec2(0.15f, 0.03f);
+	pm.texCoord[3] = glm::vec2(0.15f, 0.245f);
 
-	GLfloat texVertices[] = {
-			// pacman position			colors			texture coord
-		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.02f, 0.03f,													// 0,1
-		pm.position.x,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.02f, 0.24f,								// 0,0
-		pm.position.x + (2 / w.size.y) * 15, pm.position.y, 1.0f, 1.0f, 1.0f, 0.12929f, 0.03f,								// 1,1
-		pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f,  0.12929f, 0.24f,		// 1,0
-	};
 
-	GLuint order[] = {
-		0, 1, 2,
-		1, 2, 3
-	};
-
+	pm.position[1] = glm::vec2(pm.position[0].x, pm.position[0].y - (2 / w.size.y));
+	pm.position[2] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y);
+	pm.position[3] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y - (2 / w.size.y));
 
 	glGenVertexArrays(1, &vaoMap);
 
@@ -222,58 +220,75 @@ void setupOpengl() {
 	// Tell OpenGL how to use the enabled buffer
 	glVertexAttribPointer(VB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	/* PACMAN, GHOSTS and Special food*/
+
 
 	glGenVertexArrays(1, &vaoObj);
-
 	glBindVertexArray(vaoObj);
 
 	glGenBuffers(1, &vboObj);
 
+
+}
+
+void dynamic_code(){
+	
+	/* PACMAN, GHOSTS and Special food*/
+
+	GLfloat pacmanData[] = {
+		// pacman position			colors			texture coord
+		pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x, pm.texCoord[0].y,													// 0,1
+		pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x, pm.texCoord[1].y,								// 0,0
+		pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x, pm.texCoord[2].y,								// 1,1
+		pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x, pm.texCoord[3].y,		// 1,0
+	};
+
+	GLuint order[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+
+	
 	glBindBuffer(GL_ARRAY_BUFFER, vboObj);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texVertices), NULL, GL_STATIC_DRAW);
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texVertices), &texVertices);
-
-
+	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pacmanData), NULL, GL_STATIC_DRAW);
+	
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacmanData), &pacmanData);
+	
+	
 	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
-
-
+	
+	
 	glGenBuffers(1, &veoObj);
-
+	
 	// !!!! Make a buffer for VERTEX POSITIONS !!!!
 	// Bind the buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
-
+	
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 2, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
-
-
+	
+	
 	// Put the given data in buffer
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
-
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacman_vertices), &pacman_vertices);
-
-	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(pacman_vertices), sizeof(texCoord), &texCoord);
-
-
-
+	
+	
 	// Enable buffer 'VB_POSITION' for use
 	glEnableVertexAttribArray(VB_POSITION);
-
+	
 	// Tell OpenGL how to use the enabled buffer
 	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
-
+	
 	glEnableVertexAttribArray(VB_COLOR);
-
+	
 	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
-
+	
 	glEnableVertexAttribArray(VB_TEXTURE);
-
+	
 	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
-
+	
+	
 }
+
 
 
 void display() {
@@ -312,111 +327,114 @@ void display() {
 	glUseProgram(0);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        shouldRun = false;
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(0.0f, pm.speed);
+
+        // Move pacman a little in that direction
+		pm.position[0] += pm.direction * dt;
+		pm.position[1] += pm.direction * dt;
+		pm.position[2] += pm.direction * dt;
+		pm.position[3] += pm.direction * dt;
+
+		std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+    {
+        // Set direction to down
+        pm.direction = glm::vec2(0.0f, -pm.speed);
+
+        // Move pacman a little in that direction
+        pm.position[0] += pm.direction * dt;
+		pm.position[1] += pm.direction * dt;
+		pm.position[2] += pm.direction * dt;
+		pm.position[3] += pm.direction * dt;
+
+        std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(-pm.speed, 0.0f);
+
+        // Move pacman a little in that direction
+        pm.position[0] += pm.direction * dt;
+		pm.position[1] += pm.direction * dt;
+		pm.position[2] += pm.direction * dt;
+		pm.position[3] += pm.direction * dt;
+
+        std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+    }
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT))
+    {
+        // Set direction to up
+        pm.direction = glm::vec2(pm.speed, 0.0f);
+
+        // Move pacman a little in that direction
+        pm.position[0] += pm.direction * dt;
+		pm.position[1] += pm.direction * dt;
+		pm.position[2] += pm.direction * dt;
+		pm.position[3] += pm.direction * dt;
+
+		std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+    }
+    else if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        // Register a keyboard event callback function
+        glfwSetKeyCallback(window, pause_callback);
+    }
+}
+
+void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        // Register a keyboard event callback function
+        glfwSetKeyCallback(window, key_callback);
+    }
+}
+
+
 
 
 
 int main() {
 	readFile();
 
-	setupOpengl();
-	// Display the map on window	
+    setupOpengl();
 
-	do {
+    // Register a keyboard event callback function
+    glfwSetKeyCallback(window, key_callback);
 
-		//glDisableVertexAttribArray(0);
-		glfwPollEvents();
+    // Get time at start
+    dt = glfwGetTime();
 
-		glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
+    // Display the map on window	
+    do {
+        //glDisableVertexAttribArray(0);
+        glfwPollEvents();
 
-		display();
 
-		glfwSwapBuffers(window);
+        glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 
+		dynamic_code();
 
-	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+        // Get elapsed time
+        dt = glfwGetTime() - dt;
+        display();
+		
+        glfwSwapBuffers(window);
+        dt = glfwGetTime();
+
+    } while (shouldRun && glfwWindowShouldClose(window) == 0);
 
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
 }
-
-
-
-
-/*
-glm::vec2(0.0f, 0.0f),
-glm::vec2(0.0f, 1.0f),
-glm::vec2(1.0f, 0.0f),
-glm::vec2(0.0f, 1.0f),
-glm::vec2(1.0f, 0.0f),
-glm::vec2(1.0f, 1.0f),  */
-
-
-/*
-glm::vec2(0.0f, 0.0f),
-glm::vec2(0.0f, float(1 / 4)),
-glm::vec2(float(1 / 6), 0.0f),
-glm::vec2(0.0f, float(1 / 4)),
-glm::vec2(float(1 / 6), 0.0f),
-glm::vec2(float(1 / 4), float(1 / 6)),
-*/
-/*
-glm::vec2(0.0f, 0.0f),
-glm::vec2(0.0f, 0.5f),
-glm::vec2(0.5f, 0.0f),
-glm::vec2(0.0f, 0.5f),
-glm::vec2(0.5f, 0.0f),
-glm::vec2(0.5f, 0.5f),
-*/
-
-
-// this one is working
-/*
-glm::vec2(0.0f, 1.0f),	//top left
-glm::vec2(0.0f, 0.0f),	//top right
-glm::vec2(1.0f, 1.0f),	//lower right
-
-
-glm::vec2(0.0f, 0.0f),	//lower right
-glm::vec2(1.0f, 1.0f),	//lower left
-
-glm::vec2(1.0f, 0.0f),	//top left
-
-
-*/
-/*	glm::vec2(0.0f, 0.25f),	//lower left -> top left
-glm::vec2(0.0f, 0.0f),	//top left -> lower left
-glm::vec2(0.3f, 0.3f),	//lower right -> top right
-
-
-glm::vec2(0.0f, 0.0f),	//top-left -> lower left
-glm::vec2(0.3f, 0.3f),	//lower right -> top right
-glm::vec2(0.3f, 0.0f),	//top right -> lower right
-
-glm::vec2(0.0f, 0.5f),	//lower left -> top left
-glm::vec2(0.5f, 0.5f),	//top left -> lower left
-glm::vec2(0.0f, 1.0f),	//lower right -> top right
-
-
-glm::vec2(0.5f, 0.5f),	//top-left -> lower left
-glm::vec2(0.0f, 1.0f),	//lower right -> top right
-glm::vec2(0.5f, 1.0f),	//top right -> lower right
-*/
-
-/*
-
-glm::vec2 texCoord[] = {
-// coord		texture
-glm::vec2(0.0f, 0.0f),	//lower left -> top left
-glm::vec2(0.0f, 1.0f),	//top left -> lower left
-glm::vec2(1.0f, 0.0f),	//lower right -> top right
-
-
-glm::vec2(0.0f, 1.0f),	//top-left -> lower left
-glm::vec2(1.0f, 0.0f),	//lower right -> top right
-glm::vec2(1.0f, 1.0f),	//top right -> lower right
-};
-
-*/
