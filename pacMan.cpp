@@ -2,9 +2,9 @@
 #include "globalVar.hpp"
 #include "template.hpp"
 #include "shaderload.h"
-#include "SOIL.h"
-//#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
+//#include "SOIL.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
@@ -92,6 +92,10 @@ void setupOpengl() {
 	catch (int e) {
 		std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
 	}
+	// Blending
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSwapInterval(1);
 
@@ -137,14 +141,21 @@ void setupOpengl() {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE0);
 
-	int texWidth, texHeight;// , numComponents;
+	int texWidth, texHeight, numComponents;
 	unsigned char* image;
-	//image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
-	image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
-	//stbi_set_flip_vertically_on_load(1);
+	stbi_set_flip_vertically_on_load(true);
+	image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	//stbi_image_free(image); 
-	SOIL_free_image_data(image);
+	if (!image) {
+		std::cout << "you suck";
+	}
+	stbi_image_free(image);
+
+	
+	//image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
+	//stbi_set_flip_vertically_on_load(1);
+	//SOIL_free_image_data(image);
+
 	//std::cout << texHeight << " " << texWidth << " " << numComponents << '\n';
 
 	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
@@ -166,10 +177,11 @@ void setupOpengl() {
 	};
 
 	GLfloat texVertices[] = {
-		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.01f, 1.0f,														// 0,1
-		pm.position.x,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.0f, 0.2f,								// 0,0
-		pm.position.x + (2 / w.size.y) * 15, pm.position.y, 1.0f, 1.0f, 1.0f, 0.2f, 1.0f,								// 1,1
-		pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.2f, 0.2f,		// 1,0
+			// pacman position			colors			texture coord
+		pm.position.x, pm.position.y, 1.0f, 1.0f, 1.0f, 0.02f, 0.03f,													// 0,1
+		pm.position.x,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f, 0.02f, 0.24f,								// 0,0
+		pm.position.x + (2 / w.size.y) * 15, pm.position.y, 1.0f, 1.0f, 1.0f, 0.12929f, 0.03f,								// 1,1
+		pm.position.x + (2 / w.size.y) * 15,  pm.position.y + (2 / w.size.y) * 15, 1.0f, 1.0f, 1.0f,  0.12929f, 0.24f,		// 1,0
 	};
 
 	GLuint order[] = {
@@ -265,7 +277,7 @@ void setupOpengl() {
 
 
 void display() {
-
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vaoMap);
