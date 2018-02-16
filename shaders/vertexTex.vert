@@ -7,6 +7,8 @@ in vec2 texture;
 out vec4 vColor;
 out vec2 vTexture;
 
+
+
 void main()
  {
  	gl_Position = position;

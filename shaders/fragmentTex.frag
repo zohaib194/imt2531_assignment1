@@ -11,4 +11,5 @@ void main()
  {
 	//outColor = vColor;
 	outColor = texture(tex, vTexture);
+	
  }

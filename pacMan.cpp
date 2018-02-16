@@ -29,6 +29,7 @@ GLuint texture;
 GLuint fontTexture;
 GLuint vaoFont;
 GLuint vboFont;
+GLuint veoFont;
 
 World w;
 PacMan pm;
@@ -68,6 +69,49 @@ void readFile() {
 		}
 	}
 	inputFile.close();
+}
+
+void textData(const std::string txt, const glm::vec2 button) {
+	for (auto i : txt)
+	{
+		// Position
+		txtPos.push_back(button.x);
+		txtPos.push_back(button.y);
+		// Color
+		txtPos.push_back(textColor.x);
+		txtPos.push_back(textColor.y);
+		txtPos.push_back(textColor.z);
+		// Texture Coordinates
+		txtPos.push_back(uv[i][0].x);
+		txtPos.push_back(uv[i][0].y);
+
+		txtPos.push_back(button.x + textCharacterSize);
+		txtPos.push_back(button.y);
+		txtPos.push_back(textColor.x);
+		txtPos.push_back(textColor.y);
+		txtPos.push_back(textColor.z);
+		txtPos.push_back(uv[i][1].x);
+		txtPos.push_back(uv[i][1].y);
+
+
+		txtPos.push_back(button.x);
+		txtPos.push_back(button.y + textCharacterSize);
+		txtPos.push_back(textColor.x);
+		txtPos.push_back(textColor.y);
+		txtPos.push_back(textColor.z);
+		txtPos.push_back(uv[i][2].x);
+		txtPos.push_back(uv[i][2].y);
+
+
+		txtPos.push_back(button.x + textCharacterSize);
+		txtPos.push_back(button.y + textCharacterSize);
+		txtPos.push_back(textColor.x);
+		txtPos.push_back(textColor.y);
+		txtPos.push_back(textColor.z);
+		txtPos.push_back(uv[i][3].x);
+		txtPos.push_back(uv[i][3].y);
+
+	}
 }
 
 void setupOpengl() {
@@ -156,8 +200,8 @@ void setupOpengl() {
 	// Load texture
 
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
 	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	int texWidth, texHeight, numComponents;
 	unsigned char* image;
@@ -180,8 +224,8 @@ void setupOpengl() {
 
 	// font
 	glGenTextures(1, &fontTexture);
-	glBindTexture(GL_TEXTURE_2D, fontTexture);
 	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, fontTexture);
 
 	int fontTexWidth, fontTexHeight, numComponentsFont;
 	unsigned char* fontImage;
@@ -191,7 +235,14 @@ void setupOpengl() {
 		std::cout << "Unable to load font image";
 	}
 	stbi_image_free(fontImage);
-	
+
+	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
 
 	pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
@@ -203,6 +254,8 @@ void setupOpengl() {
 	pm.position[1] = glm::vec2(pm.position[0].x, pm.position[0].y - (2 / w.size.y));
 	pm.position[2] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y);
 	pm.position[3] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y - (2 / w.size.y));
+
+
 
 	glGenVertexArrays(1, &vaoMap);
 
@@ -246,39 +299,87 @@ void setupOpengl() {
 
 
 	/* fonts vao and vbo  */
-	
-	glm::vec2 uv[256][4];
-
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 16; j++) {
-			uv[int((i * 16) + j)][0] = glm::vec2(j      * float(1 / 16)), (16 - i) * float(1 / 16);
-			std::cout << uv[i * 16 + j][0].x << ", " << uv[i * 16 + j][0].y << '\n';
-			uv[int((i * 16) + j)][1] = glm::vec2(j      * float(1 / 16), (16 - (i + 1)) * float(1 / 16));
-			uv[int((i * 16) + j)][2] = glm::vec2((j + 1) * float(1 / 16), (16 - i) * float(1 / 16));
-			uv[int((i * 16) + j)][3] = glm::vec2((j + 1) * float(1 / 16), (16 - (i + 1)) * float(1 / 16));
+			uv[int((i * 16) + j)][0] = glm::vec2(j      * float(1.0f / 16.0f), (16.0f - i) * float(1.0f / 16.0f));
+			uv[int((i * 16) + j)][1] = glm::vec2(j      * float(1.0f / 16.0f), (16.0f - (i + 1)) * float(1.0f / 16.0f));
+			uv[int((i * 16) + j)][2] = glm::vec2((j + 1.0f) * float(1.0f / 16.0f), (16.0f - i) * float(1.0f / 16.0f));
+			uv[int((i * 16) + j)][3] = glm::vec2((j + 1.0f) * float(1.0f / 16.0f), (16.0f - (i + 1)) * float(1.0f / 16.0f));
 		}
 	}
+
 	
-	for (int i = 0; i < 256; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << uv[i][j].x << ", " << uv[i][j].y << '\n';
+	/*
+	for (size_t i = 0; i < 256; i++)
+	{	
+		for (size_t j = 0; j < 4; j++)
+		{
+			std::cout << uv[i][j].x << "  " << uv[i][j].y << '\n';
 		}
 	}
-	
+	*/
+	std::string txt = "PLAY";
+
+	textData(txt, playTextPos);
+
+
 	glGenVertexArrays(1, &vaoFont);
 	glBindVertexArray(vaoFont);
+
 	glGenBuffers(1, &vboFont);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vboFont);
 
-	GLfloat fontData[] = {
-		-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-		-1.0, -1.0, 0.0, 0.0, 0.0, float(1/16), 
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * txtPos.size(), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * txtPos.size(), &txtPos+3);
+
+	std::cout << txtPos.size();
+	
+	for (std::vector<int>::size_type i = 0; i < txtPos.size(); i++) {
+		std::cout << "i = " << i << ":  " << txtPos[i] << "\n";
+	}
+	
+ 
+	glGenBuffers(1, &veoFont);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
+
+	GLuint order[] = {
+		0, 1, 2,
+		1, 2, 3,
+
+		4, 5, 6,
+		5, 6, 7,
+		
+		8, 9, 10,
+		9, 10, 11,
+		
+		12, 13, 14,
+		13, 14, 15,
 	};
 
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 8, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
 
+
+	glEnableVertexAttribArray(VB_POSITION);
+
+	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+
+	glEnableVertexAttribArray(VB_COLOR);
+
+	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(VB_TEXTURE);
+
+	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
+
+	
 
 
 }
+
 
 void dynamic_code(){
 	
@@ -289,7 +390,7 @@ void dynamic_code(){
 		pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x, pm.texCoord[0].y,													// 0,1
 		pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x, pm.texCoord[1].y,								// 0,0
 		pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x, pm.texCoord[2].y,								// 1,1
-		pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x, pm.texCoord[3].y,		// 1,0
+		pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x, pm.texCoord[3].y,		
 	};
 
 	GLuint order[] = {
@@ -320,10 +421,6 @@ void dynamic_code(){
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
 	
 	
-	// Put the given data in buffer
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
-	
-	
 	// Enable buffer 'VB_POSITION' for use
 	glEnableVertexAttribArray(VB_POSITION);
 	
@@ -347,35 +444,30 @@ void dynamic_code(){
 void display() {
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	
+	
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vaoMap);
-
-
-
-	// GL_TRIANGLE_STRIP WAS THE PROBLEM
 	glDrawArrays(GL_TRIANGLES, 0, 6 * w.size.x * w.size.y);
 
+
 	glUseProgram(textureShaderProg);
-
-
-	//glBindVertexArray(vaoObj);
-	//glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//glBindVertexArray(0);
-
 	glBindVertexArray(vaoObj);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
-
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
 
+
+	glUseProgram(textureShaderProg);
+	glActiveTexture(GL_TEXTURE1);
+	glBindVertexArray(vaoFont);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, (const GLvoid*)0);
+	
+
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
