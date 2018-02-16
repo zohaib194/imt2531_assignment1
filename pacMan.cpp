@@ -259,13 +259,12 @@ void dynamic_code(){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
 	
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 2, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);	
 	
-	
+
 	// Put the given data in buffer
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(pacman_vertices) + sizeof(texCoord), NULL, GL_STATIC_DRAW);
-	
-	
+
 	// Enable buffer 'VB_POSITION' for use
 	glEnableVertexAttribArray(VB_POSITION);
 	
@@ -279,8 +278,6 @@ void dynamic_code(){
 	glEnableVertexAttribArray(VB_TEXTURE);
 	
 	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
-	
-	
 }
 
 
@@ -323,64 +320,44 @@ void display() {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    glm::vec4 coll = collision<PacMan>(pm);
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         shouldRun = false;
-    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP))
+
+    // Can pacman move up AND was UP or W pressed?
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && (!coll.y))
     {
         // Set direction to up
         pm.direction = glm::vec2(0.0f, pm.speed);
-
-        // Move pacman a little in that direction
-		pm.position[0] += pm.direction * dt;
-		pm.position[1] += pm.direction * dt;
-		pm.position[2] += pm.direction * dt;
-		pm.position[3] += pm.direction * dt;
-
-		std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
     }
-    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN))
+
+    // Can pacman move down AND was DOWN or S pressed?
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && (!coll.w))
     {
         // Set direction to down
         pm.direction = glm::vec2(0.0f, -pm.speed);
-
-        // Move pacman a little in that direction
-        pm.position[0] += pm.direction * dt;
-		pm.position[1] += pm.direction * dt;
-		pm.position[2] += pm.direction * dt;
-		pm.position[3] += pm.direction * dt;
-
-        std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
     }
-    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT))
+
+    // Can pacman move left AND was LEFT or A pressed?
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && (!coll.x))
     {
-        // Set direction to up
+        // Set direction to left
         pm.direction = glm::vec2(-pm.speed, 0.0f);
-
-        // Move pacman a little in that direction
-        pm.position[0] += pm.direction * dt;
-		pm.position[1] += pm.direction * dt;
-		pm.position[2] += pm.direction * dt;
-		pm.position[3] += pm.direction * dt;
-
-        std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
     }
-    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT))
+
+    // Can pacman move right AND was RIGHT or D pressed?
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && (!coll.z))
     {
-        // Set direction to up
+        // Set direction to right
         pm.direction = glm::vec2(pm.speed, 0.0f);
-
-        // Move pacman a little in that direction
-        pm.position[0] += pm.direction * dt;
-		pm.position[1] += pm.direction * dt;
-		pm.position[2] += pm.direction * dt;
-		pm.position[3] += pm.direction * dt;
-
-		std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
     }
     else if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
         // Register a keyboard event callback function
         glfwSetKeyCallback(window, pause_callback);
+
+        // The game should pause
+        pause = true;
     }
 }
 
@@ -390,6 +367,9 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
     {
         // Register a keyboard event callback function
         glfwSetKeyCallback(window, key_callback);
+
+        // The game should unpause
+        pause = false;
     }
 }
 
@@ -398,35 +378,65 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
 
 
 int main() {
-	readFile();
 
+    // Read map data from file
+    readFile();
+
+    // Setup OpenGL
     setupOpengl();
 
     // Register a keyboard event callback function
     glfwSetKeyCallback(window, key_callback);
 
-    // Get time at start
-    dt = glfwGetTime();
+    // Set pacman's direction to right
+    pm.direction = glm::vec2(pm.speed, 0.0f);
+
+    glm::vec4 coll;
 
     // Display the map on window	
     do {
-        //glDisableVertexAttribArray(0);
+
+        // Poll events from queue, so OS won't kill me
         glfwPollEvents();
 
-
-        glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
+		glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
 
 		dynamic_code();
 
         // Get elapsed time
-        dt = glfwGetTime() - dt;
-        display();
-		
-        glfwSwapBuffers(window);
         dt = glfwGetTime();
 
-    } while (shouldRun && glfwWindowShouldClose(window) == 0);
+        // Should I pause
+        if (!pause)
+        {
+            coll = collision<PacMan>(pm);
+            if ((!coll.y) && pm.direction.y > 0 ||
+                (!coll.w) && pm.direction.y < 0 ||
+                (!coll.x) && pm.direction.x < 0 ||
+                (!coll.y) && pm.direction.x > 0)
+            {
+                // Move pacman a little in that direction
+                pm.position[0] += pm.direction * dt;
+                pm.position[1] += pm.direction * dt;
+                pm.position[2] += pm.direction * dt;
+                pm.position[3] += pm.direction * dt;
 
+                std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+            }
+
+            // TODO: add ghost movement update here as well (copy and modify code above)
+        }
+
+        // Display everything
+        display();
+
+        // SWAP THE BUFFERS!
+        glfwSwapBuffers(window);
+
+        // Reset glfw time
+        glfwSetTime(0.0);
+
+    } while (shouldRun && glfwWindowShouldClose(window) == 0);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
