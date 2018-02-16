@@ -225,17 +225,14 @@ void setupOpengl() {
 
 void dynamic_code(){
 	
-	/* Animate before binding*/
-	animate<PacMan>(pm, 2);
-
-
 	/* PACMAN, GHOSTS and Special food*/
-
+    animate<PacMan>(pm, 2);
+    //std::cout << pm.texCoord[0].x + pm.texOffset.x <<" " << pm.texCoord[0].y + pm.texOffset.y << std::endl;
 	GLfloat pacmanData[] = {
 		// pacman position			colors			texture coord
-		pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x + pm.texOffset.x, pm.texCoord[0].y + pm.texOffset.y,		// 0,1
-		pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x + pm.texOffset.x, pm.texCoord[1].y + pm.texOffset.y,		// 0,0
-		pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x + pm.texOffset.x, pm.texCoord[2].y + pm.texOffset.y,		// 1,1
+		pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x + pm.texOffset.x, pm.texCoord[0].y + pm.texOffset.y,													// 0,1
+		pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x + pm.texOffset.x, pm.texCoord[1].y + pm.texOffset.y,								// 0,0
+		pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x + pm.texOffset.x, pm.texCoord[2].y + pm.texOffset.y,								// 1,1
 		pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x + pm.texOffset.x, pm.texCoord[3].y + pm.texOffset.y,		// 1,0
 	};
 
