@@ -12,6 +12,7 @@ unsigned int score;
 // World
 float dt = 0.0f;
 bool shouldRun = true;
+bool pause = false;
 
 // Character info
 World w;
