@@ -10,7 +10,7 @@ template <class animatable>
 void animate(animatable &ani, int frameCount){
  
 	int state;
-	ani.animationTime += dt*100;
+	ani.animationTime += dt;
 	//std::cout << ani.animationTime << std::endl;
 	if (ani.animationTime < animationDuration && ani.animationTime != 0.0f)
 	{	
