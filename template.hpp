@@ -8,20 +8,20 @@
 
 template <class animatable>
 void animate(animatable &ani, int frameCount){
-
+ 
 	int state;
-	ani.animationTime += dt;
-	std::cout << ani.animationTime << std::endl;
-	if (ani.animationTime < animationDuration)
+	ani.animationTime += dt*100;
+	//std::cout << ani.animationTime << std::endl;
+	if (ani.animationTime < animationDuration && ani.animationTime != 0.0f)
 	{	
 		// playing forward
 		if (animationDuration > ani.animationTime / 2)
 		{
-			state = floor((animationDuration / frameCount *2) * ani.animationTime);
+			state = floor( ani.animationTime / (animationDuration / (frameCount *2)));
 		}
 		else	//playing backwards
 		{
-			state = frameCount * 2 - floor((animationDuration / frameCount *2) * ani.animationTime);		
+			state = frameCount * 2 - floor( ani.animationTime / (animationDuration / (frameCount *2)));		
 		}
 
 	}
@@ -30,7 +30,7 @@ void animate(animatable &ani, int frameCount){
 	 	state = 0;
 		ani.animationTime = 0.0;
 	}
-
+	//std::cout << state << std::endl;
 	ani.texOffset.x = textureSize.x * state + textureMargin.x * state * 2; 
 }
 

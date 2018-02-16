@@ -1,5 +1,5 @@
-#include "structs.hpp"
-#include "globalVar.hpp"
+//#include "structs.hpp"
+//#include "globalVar.hpp"
 #include "template.hpp"
 #include "shaderload.h"
 //#include "SOIL.h"
