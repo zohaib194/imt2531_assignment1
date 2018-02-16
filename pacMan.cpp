@@ -5,12 +5,15 @@
 //#include "SOIL.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <time.h>
+
 
 enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
 
@@ -23,6 +26,9 @@ GLuint vaoObj;
 GLuint veoObj;
 GLuint vboObj; // [NUM_BUFFERS];
 GLuint texture;
+GLuint fontTexture;
+GLuint vaoFont;
+GLuint vboFont;
 
 World w;
 PacMan pm;
@@ -159,16 +165,10 @@ void setupOpengl() {
 	image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	if (!image) {
-		std::cout << "you suck";
+		std::cout << "Unable to load pacman texture";
 	}
 	stbi_image_free(image);
 
-	
-	//image = SOIL_load_image("./assets/pacman.png", &texWidth, &texHeight, 0, SOIL_LOAD_AUTO);
-	//stbi_set_flip_vertically_on_load(1);
-	//SOIL_free_image_data(image);
-
-	//std::cout << texHeight << " " << texWidth << " " << numComponents << '\n';
 
 	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
 
@@ -176,6 +176,22 @@ void setupOpengl() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	// font
+	glGenTextures(1, &fontTexture);
+	glBindTexture(GL_TEXTURE_2D, fontTexture);
+	glActiveTexture(GL_TEXTURE1);
+
+	int fontTexWidth, fontTexHeight, numComponentsFont;
+	unsigned char* fontImage;
+	fontImage = stbi_load("./font.png", &fontTexWidth, &fontTexHeight, &numComponentsFont, 4);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fontTexWidth, fontTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, fontImage);
+	if (!fontImage) {
+		std::cout << "Unable to load font image";
+	}
+	stbi_image_free(fontImage);
+	
 
 
 	pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
@@ -228,6 +244,40 @@ void setupOpengl() {
 	glGenBuffers(1, &vboObj);
 
 
+
+	/* fonts vao and vbo  */
+	
+	glm::vec2 uv[256][4];
+
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 16; j++) {
+			uv[int((i * 16) + j)][0] = glm::vec2(j      * float(1 / 16)), (16 - i) * float(1 / 16);
+			std::cout << uv[i * 16 + j][0].x << ", " << uv[i * 16 + j][0].y << '\n';
+			uv[int((i * 16) + j)][1] = glm::vec2(j      * float(1 / 16), (16 - (i + 1)) * float(1 / 16));
+			uv[int((i * 16) + j)][2] = glm::vec2((j + 1) * float(1 / 16), (16 - i) * float(1 / 16));
+			uv[int((i * 16) + j)][3] = glm::vec2((j + 1) * float(1 / 16), (16 - (i + 1)) * float(1 / 16));
+		}
+	}
+	
+	for (int i = 0; i < 256; i++) {
+		for (int j = 0; j < 4; j++) {
+			std::cout << uv[i][j].x << ", " << uv[i][j].y << '\n';
+		}
+	}
+	
+	glGenVertexArrays(1, &vaoFont);
+	glBindVertexArray(vaoFont);
+	glGenBuffers(1, &vboFont);
+	glBindBuffer(GL_ARRAY_BUFFER, vboFont);
+
+	GLfloat fontData[] = {
+		-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+		-1.0, -1.0, 0.0, 0.0, 0.0, float(1/16), 
+	};
+
+
+
+
 }
 
 void dynamic_code(){
@@ -247,6 +297,8 @@ void dynamic_code(){
 		1, 2, 3
 	};
 
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glActiveTexture(GL_TEXTURE0);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vboObj);
 	
@@ -288,6 +340,7 @@ void dynamic_code(){
 	
 	
 }
+
 
 
 
@@ -401,11 +454,11 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
 
 
 
-
+	
 
 int main() {
 	readFile();
-
+		
     setupOpengl();
 
     // Register a keyboard event callback function
