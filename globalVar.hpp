@@ -14,6 +14,9 @@ float dt = 0.0f;
 bool shouldRun = true;
 bool pause = false;
 
+// Collision toleranse
+float collTolerance = 0.05f;
+
 // Character info
 World w;
 PacMan pm;

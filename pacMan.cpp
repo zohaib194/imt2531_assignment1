@@ -320,33 +320,33 @@ void display() {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    glm::vec4 coll = collision<PacMan>(pm);
+    //glm::vec4 coll = checkCollision<PacMan>(pm);
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         shouldRun = false;
 
     // Can pacman move up AND was UP or W pressed?
-    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && (!coll.y))
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP))// && (!coll.y))
     {
         // Set direction to up
         pm.direction = glm::vec2(0.0f, pm.speed);
     }
 
     // Can pacman move down AND was DOWN or S pressed?
-    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && (!coll.w))
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) // && (!coll.w))
     {
         // Set direction to down
         pm.direction = glm::vec2(0.0f, -pm.speed);
     }
 
     // Can pacman move left AND was LEFT or A pressed?
-    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && (!coll.x))
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT)) // && (!coll.x))
     {
         // Set direction to left
         pm.direction = glm::vec2(-pm.speed, 0.0f);
     }
 
     // Can pacman move right AND was RIGHT or D pressed?
-    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && (!coll.z))
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT)) // && (!coll.z))
     {
         // Set direction to right
         pm.direction = glm::vec2(pm.speed, 0.0f);
@@ -413,11 +413,11 @@ int main() {
         // Should I pause
         if (!pause)
         {
-            coll = collision<PacMan>(pm);
-            if ((!coll.y) && pm.direction.y > 0 ||
+            coll = checkCollision<PacMan, int>(pm);
+            /*if ((!coll.y) && pm.direction.y > 0 ||
                 (!coll.w) && pm.direction.y < 0 ||
                 (!coll.x) && pm.direction.x < 0 ||
-                (!coll.y) && pm.direction.x > 0)
+                (!coll.y) && pm.direction.x > 0)*/
             {
                 // Move pacman a little in that direction
                 pm.position[0] += pm.direction * dt;
@@ -425,7 +425,7 @@ int main() {
                 pm.position[2] += pm.direction * dt;
                 pm.position[3] += pm.direction * dt;
 
-                std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+                //std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
             }
 
             // TODO: add ghost movement update here as well (copy and modify code above)
