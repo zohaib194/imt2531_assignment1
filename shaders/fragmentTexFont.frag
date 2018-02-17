@@ -9,7 +9,7 @@ uniform sampler2D texFont;
 
 void main()
  {
-	//outColor = vColor;
+//outColor = vColor;
 	outColor = vColor * texture(texFont, vTexture);
 	
  }

@@ -73,44 +73,54 @@ void readFile() {
 }
 
 void textData(const std::string txt, const glm::vec2 button) {
+	int k = 0;
 	for (auto i : txt)
 	{
+
 		// Position
-		txtPos.push_back(button.x);
-		txtPos.push_back(button.y);
+		txtPos.push_back(button.x + textCharacterSize * (k + 0));
+		txtPos.push_back(button.y - textCharacterSize);
 		// Color
 		txtPos.push_back(textColor.x);
 		txtPos.push_back(textColor.y);
 		txtPos.push_back(textColor.z);
 		// Texture Coordinates
-		txtPos.push_back(uv[i][0].x);
-		txtPos.push_back(uv[i][0].y);
+		txtPos.push_back(uv[i][1].x);
+		txtPos.push_back(uv[i][1].y);
+		
+		
 
-		txtPos.push_back(button.x + textCharacterSize * 15);
+		txtPos.push_back(button.x + textCharacterSize * (k + 0));
 		txtPos.push_back(button.y);
 		txtPos.push_back(textColor.x);
 		txtPos.push_back(textColor.y);
 		txtPos.push_back(textColor.z);
-		txtPos.push_back(uv[i][1].x);
-		txtPos.push_back(uv[i][1].y);
+		txtPos.push_back(uv[i][0].x);
+		txtPos.push_back(uv[i][0].y);
 
 
-		txtPos.push_back(button.x);
-		txtPos.push_back(button.y + textCharacterSize * 15);
+		txtPos.push_back(button.x + textCharacterSize *(k + 1));
+		txtPos.push_back(button.y - textCharacterSize);
+		txtPos.push_back(textColor.x);
+		txtPos.push_back(textColor.y);
+		txtPos.push_back(textColor.z);
+		txtPos.push_back(uv[i][3].x);
+		txtPos.push_back(uv[i][3].y);
+
+		
+
+
+		txtPos.push_back(button.x + textCharacterSize * (k + 1));
+		txtPos.push_back(button.y);
 		txtPos.push_back(textColor.x);
 		txtPos.push_back(textColor.y);
 		txtPos.push_back(textColor.z);
 		txtPos.push_back(uv[i][2].x);
 		txtPos.push_back(uv[i][2].y);
 
+		
+		k++;
 
-		txtPos.push_back(button.x + textCharacterSize * 15);
-		txtPos.push_back(button.y + textCharacterSize * 15);
-		txtPos.push_back(textColor.x);
-		txtPos.push_back(textColor.y);
-		txtPos.push_back(textColor.z);
-		txtPos.push_back(uv[i][3].x);
-		txtPos.push_back(uv[i][3].y);
 
 	}
 }
@@ -202,7 +212,7 @@ void setupOpengl() {
 	// Load texture
 
 	glGenTextures(2, texture);
-	/*glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 	int texWidth, texHeight, numComponents;
@@ -225,7 +235,7 @@ void setupOpengl() {
 
 	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
 
-	*/
+	
 
 	// font
 	glActiveTexture(GL_TEXTURE1);
@@ -233,7 +243,7 @@ void setupOpengl() {
 
 	int fontTexWidth, fontTexHeight, numComponentsFont;
 	unsigned char* fontImage;
-	fontImage = stbi_load("./font.png", &fontTexWidth, &fontTexHeight, &numComponentsFont, 4);
+	fontImage = stbi_load("./assets/font.png", &fontTexWidth, &fontTexHeight, &numComponentsFont, 4);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fontTexWidth, fontTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, fontImage);
 	if (!fontImage) {
 		std::cout << "Unable to load font image\n";
@@ -246,7 +256,7 @@ void setupOpengl() {
 
 	stbi_image_free(fontImage);
 
-	glUniform1i(glGetUniformLocation(fontTextureShaderProg, "texFont"), 1);
+	glUniform1i(glGetUniformLocation(fontTextureShaderProg, "texFont"), 0);
 
 
 
@@ -312,15 +322,17 @@ void setupOpengl() {
 	/* fonts vao and vbo  */
 	for (int i = 0; i < 16; i++) {
 		for (int j = 0; j < 16; j++) {
-			uv[int((i * 16) + j)][0] = glm::vec2(j      * float(1.0f / 16.0f), (16.0f - i) * float(1.0f / 16.0f));
-			uv[int((i * 16) + j)][1] = glm::vec2(j      * float(1.0f / 16.0f), (16.0f - (i + 1)) * float(1.0f / 16.0f));
-			uv[int((i * 16) + j)][2] = glm::vec2((j + 1.0f) * float(1.0f / 16.0f), (16.0f - i) * float(1.0f / 16.0f));
-			uv[int((i * 16) + j)][3] = glm::vec2((j + 1.0f) * float(1.0f / 16.0f), (16.0f - (i + 1)) * float(1.0f / 16.0f));
+			uv[int((i * 16) + j)][0] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
+			uv[int((i * 16) + j)][1] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
+			uv[int((i * 16) + j)][2] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
+			uv[int((i * 16) + j)][3] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
 		}
 	}
 
-	
+	std::cout << playTextPos.x + textCharacterSize << '\n';
+
 	/*
+	
 	for (size_t i = 0; i < 256; i++)
 	{	
 		for (size_t j = 0; j < 4; j++)
@@ -330,9 +342,9 @@ void setupOpengl() {
 	}
 	*/
 	std::string txt = "PLAY";
-
+	std::string txt2 = "EXIT";
 	textData(txt, playTextPos);
-
+	textData(txt2, exitTextPos);
 
 	glGenVertexArrays(1, &vaoFont);
 	glBindVertexArray(vaoFont);
@@ -346,11 +358,11 @@ void setupOpengl() {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * txtPos.size(), &txtPos[0]);
 
 	std::cout << txtPos.size();
-	
+	/*
 	for (std::vector<int>::size_type i = 0; i < txtPos.size(); i++) {
 		std::cout << "i = " << i << ":  " << txtPos[i] << "\n";
 	}
-	
+	*/
  
 	glGenBuffers(1, &veoFont);
 
@@ -358,7 +370,7 @@ void setupOpengl() {
 	GLuint order[] = {
 		0, 1, 2,
 		1, 2, 3,
-		/*
+	
 		4, 5, 6,
 		5, 6, 7,
 		
@@ -366,11 +378,23 @@ void setupOpengl() {
 		9, 10, 11,
 		
 		12, 13, 14,
-		13, 14, 15, */
+		13, 14, 15, 
+
+		16, 17, 18,
+		17, 18, 19,
+
+		20, 21, 22,
+		21, 22, 23,
+
+		24, 25, 26,
+		25, 26, 27,
+
+		28, 29, 30,
+		29, 30, 31,
 	};
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 2, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 16, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
 
 
@@ -451,21 +475,21 @@ void display() {
 	glBindVertexArray(vaoMap);
 	glDrawArrays(GL_TRIANGLES, 0, 6 * w.size.x * w.size.y);
 
-	/*
+	
 	glUseProgram(textureShaderProg);
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	glActiveTexture(GL_TEXTURE);
+	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vaoObj);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
-	*/
+	
 	
 	glUseProgram(fontTextureShaderProg);
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glActiveTexture(GL_TEXTURE1);
 	glBindVertexArray(vaoFont);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, 48, GL_UNSIGNED_INT, (const GLvoid*)0);
 	
 
 	
@@ -568,7 +592,7 @@ int main() {
         glfwPollEvents();
 
 
-        glClearColor(0.5f, 1.0f, 1.0f, 0.0f);
+        glClearColor(0.15f, 0.15f, 0.15f, 0.0f);
 
 		dynamic_code();
 
