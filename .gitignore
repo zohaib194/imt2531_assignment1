@@ -3,10 +3,24 @@ lib/
 SOIL/
 enc_temp_folder/
 
+# Gennerated by cmake
 CMakeFiles/
 CMakeCache.txt
 CMakeLists.txt
 cmake_install.cmake
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
+Makefile
+*.frag 
+*.vert
+*.glsl
+
+# dependencies
+glew/
+GLFW/
+glm/
+SOIL/
+
 
 # Created by https://www.gitignore.io/api/visualstudio,visualstudiocode
 
