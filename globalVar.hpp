@@ -18,6 +18,9 @@ bool pause = false;
 World w;
 PacMan pm;
 
+const GLuint ghostCount=3;
+Ghost gh[ghostCount];
+
 // File info
 const std::string textureFile = "./assets/pacman.png";
 const std::string mapFile = "./levels/level0";
@@ -28,3 +31,4 @@ const glm::vec2 textureMargin = glm::vec2(0.015f, 0.03f);	// Margin around each 
 
 // Animation info
 const float animationDuration = 0.5;
+

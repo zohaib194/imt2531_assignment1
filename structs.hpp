@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 
-
 struct PacMan
 {
     glm::vec2 position[4]; 
@@ -19,7 +18,7 @@ struct Ghost
     glm::vec2 position[4]; 
     glm::vec2 direction;
     glm::vec2 texCoord[4];
-    glm::vec2 texOffset;
+    glm::vec2 texOffset = glm::vec2(0.0f, 0.0f);
     double animationTime = 0.0;
 };
 

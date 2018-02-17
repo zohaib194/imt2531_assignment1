@@ -98,8 +98,8 @@ void setupOpengl() {
         std::cout << "Failed to initialize GLEW! Exception nr: " << e << '\n';
     }
     // Blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSwapInterval(1);
@@ -170,17 +170,42 @@ void setupOpengl() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
+    // Pacman text initial coordiantes
     pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
     pm.texCoord[1] = glm::vec2(0.02f, 0.245f);
     pm.texCoord[2] = glm::vec2(0.15f, 0.03f);
     pm.texCoord[3] = glm::vec2(0.15f, 0.245f);
 
-
-    pm.position[1] = glm::vec2(pm.position[0].x, pm.position[0].y - (2 / w.size.y));
+    // Pacman initial position
+    pm.position[0] = glm::vec2(pm.position[0].x, pm.position[0].y - (2 / w.size.y));
+    pm.position[1] = glm::vec2(pm.position[0].x, pm.position[0].y + (2 / w.size.y));
     pm.position[2] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y);
-    pm.position[3] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y - (2 / w.size.y));
+    pm.position[3] = glm::vec2(pm.position[0].x + (2 / w.size.y), pm.position[0].y + (2 / w.size.y));
 
+    // Reference position for ghost
+    gh[0].position[0] = /*glm::vec2((5 * (2 / w.size.x) - 1), (1 - 7 * (2 / w.size.y)));*/ glm::vec2(-1,-1);
+    gh[1].position[0] = /*glm::vec2((5 * (2 / w.size.x) - 1), (1 - 7 * (2 / w.size.y)));*/ glm::vec2(0,0);
+    gh[2].position[0] = /*glm::vec2((5 * (2 / w.size.x) - 1), (1 - 9 * (2 / w.size.y)));*/ glm::vec2(0.5, 0.5);
+
+    // Position relative to reference for ghost
+    for (int i = 0; i < ghostCount; ++i)
+    {
+        gh[i].position[1] = glm::vec2(gh[i].position[0].x, gh[0].position[0].y + (2 / w.size.y));
+        gh[i].position[2] = glm::vec2(gh[i].position[0].x + (2 / w.size.y), gh[i].position[0].y);
+        gh[i].position[3] = glm::vec2(gh[i].position[0].x + (2 / w.size.y), gh[i].position[0].y + (2 / w.size.y));
+    }
+
+    // texture for ghost
+    for (int i = 0; i < ghostCount; ++i)
+    {
+        gh[i].texCoord[0] = glm::vec2(0.85f, 0.03f);
+        gh[i].texCoord[1] = glm::vec2(0.85f, 0.245f);
+        gh[i].texCoord[2] = glm::vec2(0.98f, 0.03f);
+        gh[i].texCoord[3] = glm::vec2(0.98f, 0.245f);
+    }
+
+    std::cout << gh[0].position[0].x << " " << gh[0].position[0].y << " " << gh[1].position[0].x << " " << gh[1].position[0].y << " " << gh[2].position[0].x << " " << gh[2].position[0].y << " ";
+    
     glGenVertexArrays(1, &vaoMap);
 
     glBindVertexArray(vaoMap);
@@ -228,22 +253,55 @@ void dynamic_code(){
     /* PACMAN, GHOSTS and Special food*/
     animate<PacMan>(pm, 2);
     //std::cout << pm.texCoord[0].x + pm.texOffset.x <<" " << pm.texCoord[0].y + pm.texOffset.y << std::endl;
-    GLfloat pacmanData[] = {
-        // pacman position          colors          texture coord
-        pm.position[0].x, pm.position[0].y, 1.0f, 1.0f, 1.0f, pm.texCoord[0].x + pm.texOffset.x, pm.texCoord[0].y + pm.texOffset.y,                                                 // 0,1
-        pm.position[1].x, pm.position[1].y, 1.0f, 1.0f, 1.0f, pm.texCoord[1].x + pm.texOffset.x, pm.texCoord[1].y + pm.texOffset.y,                             // 0,0
-        pm.position[2].x, pm.position[2].y, 1.0f, 1.0f, 1.0f, pm.texCoord[2].x + pm.texOffset.x, pm.texCoord[2].y + pm.texOffset.y,                             // 1,1
-        pm.position[3].x, pm.position[3].y, 1.0f, 1.0f, 1.0f, pm.texCoord[3].x + pm.texOffset.x, pm.texCoord[3].y + pm.texOffset.y,     // 1,0
-    };
+    GLfloat pacmanData[(7*4)*(ghostCount+1)];
+
+    // Adding pacman to pacmanData
+    for (int i = 0; i < 4; ++i)
+    {   // possition x                          y
+        pacmanData[7*i+0] = pm.position[i].x; pacmanData[7*i+1] = pm.position[i].y;
+
+        // Color R                  G                           B
+        pacmanData[7*i+2] = 1.0f; pacmanData[7*i+3] = 1.0f; pacmanData[7*i+4] = 1.0f;
+
+        // Texture      x                       y
+        pacmanData[7*i+5]= pm.texCoord[i].x + pm.texOffset.x; pacmanData[7*i+6] = pm.texCoord[i].y + pm.texOffset.y;
+    }
+
+        // ghost position           color           texture coord
+    for (int j = 0; j < ghostCount; ++j)
+    {
+        //std::cout << std::endl  << std::endl << gh[j].position[0].x << "   " << gh[j].position[0].y << std::endl << std::endl;
+        for (int i = 0; i < 4; ++i)
+        {   // possition x                          y
+            pacmanData[(j+1)*(7*4)+(7*i+0)] = gh[j].position[i].x; pacmanData[(j+1)*(7*4)+(7*i+1)] = gh[j].position[i].y;
+
+            // Color R                  G                           B
+            pacmanData[(j+1)*(7*4)+(7*i+2)] = 1.0f; pacmanData[(j+1)*(7*4)+(7*i+3)] = 1.0f; pacmanData[(j+1)*(7*4)+(7*i+4)] = 1.0f;
+
+            // Texture      x                       y
+            pacmanData[(j+1)*(7*4)+(7*i+5)]= gh[j].texCoord[i].x + gh[j].texOffset.x; pacmanData[(j+1)*(7*4)+(7*i+6)] = gh[j].texCoord[i].y + gh[j].texOffset.y;
+        }
+    }
+
+     std::cout << gh[0].position[0].x << " " << gh[0].position[0].y << " " << gh[1].position[0].x << " " << gh[1].position[0].y << " " << gh[2].position[0].x << " " << gh[2].position[0].y << "\n\n";
 
     GLuint order[] = {
         0, 1, 2,
-        1, 2, 3
+        1, 2, 3,
+
+        4, 5, 6,
+        5, 6, 7,
+
+        8, 9, 10,
+        9, 10, 11,
+
+        12, 13, 14,
+        13, 14, 15
     };
 
     
     glBindBuffer(GL_ARRAY_BUFFER, vboObj);
-    
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(pacmanData), NULL, GL_STATIC_DRAW);
     
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pacmanData), &pacmanData);
@@ -258,7 +316,7 @@ void dynamic_code(){
     // Bind the buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
     
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 2, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (sizeof(GLuint) * 3) * ((ghostCount+1)*2), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order); 
     
 
@@ -309,7 +367,7 @@ void display() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, (const GLvoid*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -398,7 +456,7 @@ int main() {
 
         // Get elapsed time
         dt = glfwGetTime();
-        
+
         // Reset glfw time
         glfwSetTime(0.0);
 
@@ -425,7 +483,7 @@ int main() {
                 pm.position[2] += pm.direction * dt;
                 pm.position[3] += pm.direction * dt;
 
-                std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
+                //std::cout << "PM pos: " << "(" << pm.position[0].x << ", " << pm.position[0].y << "). dt = " << dt << "\n";
             }
 
             // TODO: add ghost movement update here as well (copy and modify code above)
