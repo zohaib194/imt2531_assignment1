@@ -47,6 +47,8 @@ void setupOpengl();
 void display();
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+
 
 void readFile() {
 	std::ifstream inputFile;
@@ -70,6 +72,17 @@ void readFile() {
 		}
 	}
 	inputFile.close();
+}
+
+
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		std::cout << "mouse button clicked\n";
+		glfwSetKeyCallback(window, key_callback);
+	}
+
 }
 
 void textData(const std::string txt, const glm::vec2 button) {
@@ -483,7 +496,7 @@ void display() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const GLvoid*)0);
 	
-	
+
 	glUseProgram(fontTextureShaderProg);
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glActiveTexture(GL_TEXTURE1);
@@ -572,7 +585,6 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
 }
 
 
-
 	
 
 int main() {
@@ -582,6 +594,9 @@ int main() {
 
     // Register a keyboard event callback function
     glfwSetKeyCallback(window, key_callback);
+
+	// Register mouse button event callback function
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // Get time at start
     dt = glfwGetTime();
