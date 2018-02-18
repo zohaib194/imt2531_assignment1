@@ -10,34 +10,6 @@
 #include <iomanip>
 #include <time.h>
 
-
-enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
-
-GLuint vaoMap;
-GLuint vbo[NUM_BUFFERS];
-
-GLuint vaoObj;
-GLuint veoObj;
-GLuint vboObj; // [NUM_BUFFERS];
-GLuint texture[2];
-//GLuint fontTexture;
-GLuint vaoFont;
-GLuint vboFont;
-GLuint veoFont;
-
-// Global varaibles
-GLuint shaderProgram;
-GLuint textureShaderProg;
-GLuint fontTextureShaderProg;
-
-// Function declarations
-void readFile();
-void setupOpengl();
-void display();
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-
 enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
 
 GLuint vaoMap;
@@ -106,7 +78,7 @@ void placeFood(const std::string dab, int i, int j){
     {
         // pickup position
         foodContainer.push_back((j * (2 / w.size.x) - 1));
-        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize);
+        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
 
         // pickup color
         foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
@@ -116,8 +88,8 @@ void placeFood(const std::string dab, int i, int j){
         foodContainer.push_back(0.8125f);
 
         // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
-        foodContainer.push_back((1 - i * (2 / w.size.y)));
+        foodContainer.push_back((j * (2 / w.size.x) - 1));
+        foodContainer.push_back((1 - i * (2 / w.size.y)) + textCharacterSize/2.0f);
 
         // pickup color
         foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
@@ -127,8 +99,8 @@ void placeFood(const std::string dab, int i, int j){
         foodContainer.push_back(0.875f);
 
         // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
-        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize);
+        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
+        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
 
         // pickup color
         foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
@@ -138,7 +110,7 @@ void placeFood(const std::string dab, int i, int j){
         foodContainer.push_back(0.8125);
 
         // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
+        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
         foodContainer.push_back((1 - i * (2 / w.size.y)));
 
         // pickup color
@@ -569,8 +541,8 @@ void setupOpengl() {
     }
     */
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  (foodContainer.size() / 7) *6, NULL, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(foodOrder), foodOrder );
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * (foodContainer.size() / 7) *6, NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(int) * (foodContainer.size() / 7) *6, foodOrder );
 
     glEnableVertexAttribArray(VB_POSITION);
 
