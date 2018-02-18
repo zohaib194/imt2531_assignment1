@@ -60,6 +60,7 @@ void readFile() {
                 if (x == 0)
                 {
                     placeFood(dotsy, (1 - i * (2 / w.size.y)), (j * (2 / w.size.x) - 1));
+					numberOfDots++;
 
                 }
 
@@ -89,7 +90,7 @@ void placeFood(const std::string dab, float i, float j){
 
         // pickup position
         foodContainer.push_back(j);
-        foodContainer.push_back(i + (2 / w.size.y));
+        foodContainer.push_back(i - (2 / w.size.y));
 
         // pickup color
         foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
@@ -111,7 +112,7 @@ void placeFood(const std::string dab, float i, float j){
 
         // pickup position
         foodContainer.push_back(j + (2 / w.size.y));
-        foodContainer.push_back(i + (2 / w.size.y));
+        foodContainer.push_back(i - (2 / w.size.y));
 
         // pickup color
         foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
@@ -133,6 +134,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void textData(const std::string txt, const glm::vec2 button) {
+
     int k = 0;
     for (auto i : txt)
     {
@@ -512,39 +514,22 @@ void setupOpengl() {
     // Indicies
     glGenBuffers(1, &eboFood);
 
-    int* foodOrder = new int[foodContainer.size()];
 
-    for (int i = 0; i < foodContainer.size() / 7; ++i)
+    for (int i = 0; i < (foodContainer.size() / 7); ++i)
     {
-        foodOrder[(i*6) + 0]= (i*4) + 0;
-        foodOrder[(i*6) + 1]= (i*4) + 1;
-        foodOrder[(i*6) + 2]= (i*4) + 2;
+        foodOrder.push_back((i*4) + 0);
+        foodOrder.push_back((i*4) + 1);
+        foodOrder.push_back((i*4) + 2);
 
-        foodOrder[(i*6) + 3]= (i*4) + 1;
-        foodOrder[(i*6) + 4]= (i*4) + 2;
-        foodOrder[(i*6) + 5]= (i*4) + 3;
+        foodOrder.push_back((i*4) + 1);
+        foodOrder.push_back((i*4) + 2);
+        foodOrder.push_back((i*4) + 3);
     }
 
-    // Display order 
-    /*
-    for (int i = 0; i < foodContainer.size()/7; ++i)
-    {
-        std::cout << foodOrder[(i*6) + 0] << ", " << foodOrder[(i*6) + 1] << ", " << foodOrder[(i*6) + 2] << ", \n";
-        std::cout << foodOrder[(i*6) + 3] << ", " << foodOrder[(i*6) + 4] << ", " << foodOrder[(i*6) + 5] << ", \n\n";
-    }
-    */
-
-    // Display foodContainer
-    /*for (auto i: foodContainer)
-    {
-        std::cout << i <<" ";
-    }
-    */
-
-
+	
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * (foodContainer.size() / 7), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(int) * (foodContainer.size() / 7), foodOrder );
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * foodOrder.size(), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * foodOrder.size(), &foodOrder[0]);
 
     glEnableVertexAttribArray(VB_POSITION);
 
@@ -704,7 +689,7 @@ void display() {
     glActiveTexture(GL_TEXTURE1);
     glBindVertexArray(vaoFood);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
-    glDrawElements(GL_TRIANGLES, foodContainer.size() / 7, GL_UNSIGNED_INT, (const GLvoid*)0);
+    glDrawElements(GL_TRIANGLES, numberOfDots * 2 * 3, GL_UNSIGNED_INT, (const GLvoid*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

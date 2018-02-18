@@ -15,6 +15,8 @@ unsigned int score;
 
 // Food info
 std::vector<GLfloat> foodContainer;
+std::vector<GLuint> foodOrder;
+int numberOfDots = 0;
 
 // World
 float dt = 0.0f;
