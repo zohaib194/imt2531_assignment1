@@ -110,8 +110,6 @@ void textData(const std::string txt, const glm::vec2 button) {
 		txtPos.push_back(uv[i][3].y);
 
 		
-
-
 		txtPos.push_back(button.x + textCharacterSize * (k + 1));
 		txtPos.push_back(button.y);
 		txtPos.push_back(textColor.x);
@@ -179,7 +177,7 @@ void setupOpengl() {
     glm::vec4* vertices_color;
 
     glm::vec4 tileColor;
-
+	
     vertices_position = new glm::vec2[int(w.size.x * w.size.y * 6)];
     vertices_color = new glm::vec4[int(w.size.x * w.size.y * 6)];
 
