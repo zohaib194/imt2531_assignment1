@@ -38,8 +38,8 @@ const glm::vec2 playTextPos(-0.6f, 0.2f);
 const glm::vec2 exitTextPos(-0.6f, 0.0f);
 const glm::vec2 pauseTextPos(-1.0f, float(1 - textCharacterSize));
 const glm::vec3 textColor(1.0f, 0.7f, 0.30f);
-const std::string txt = ".";
-const std::string txt2 = "";
+const std::string txt = "PLAY-P";
+const std::string txt2 = "EXIT-E";
 std::vector<GLfloat> txtPos;
 glm::vec2 uv[256][4];
 
