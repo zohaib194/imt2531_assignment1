@@ -38,6 +38,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
+enum { VB_POSITION, VB_COLOR, VB_TEXTURE, NUM_BUFFERS };
+
+GLuint vaoMap;
+GLuint vbo[NUM_BUFFERS];
+
+GLuint vaoObj;
+GLuint veoObj;
+GLuint vboObj; // [NUM_BUFFERS];
+GLuint texture[2];
+//GLuint fontTexture;
+GLuint vaoFont;
+GLuint vboFont;
+GLuint veoFont;
+
+// Global varaibles
+GLuint shaderProgram;
+GLuint textureShaderProg;
+GLuint fontTextureShaderProg;
+
+// food 
+GLuint vaoFood;
+GLuint vboFood;
+GLuint eboFood;
+
+// Function declarations
+void readFile();
+void setupOpengl();
+void display();
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void placeFood(const std::string dab, int i, int j);
 
 void readFile() {
     std::ifstream inputFile;
@@ -53,6 +85,12 @@ void readFile() {
                 inputFile >> x;
                 w.map.push_back(glm::vec3((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)), x));
 
+                if (x == 0)
+                {
+                    placeFood(dotsy,i, j);
+
+                }
+
                 // Find tile of type 2 and set it to pacmans starting pos
                 if (x == 2)
                     pm.position[0] = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
@@ -63,68 +101,115 @@ void readFile() {
     inputFile.close();
 }
 
+void placeFood(const std::string dab, int i, int j){
+    for (auto dot : dab)
+    {
+        // pickup position
+        foodContainer.push_back((j * (2 / w.size.x) - 1));
+        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize);
+
+        // pickup color
+        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+
+        // texture position
+        foodContainer.push_back(0.875f);
+        foodContainer.push_back(0.8125f);
+
+        // pickup position
+        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
+        foodContainer.push_back((1 - i * (2 / w.size.y)));
+
+        // pickup color
+        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+   
+        // texture position
+        foodContainer.push_back(0.875f);
+        foodContainer.push_back(0.875f);
+
+        // pickup position
+        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
+        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize);
+
+        // pickup color
+        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+
+        // texture position
+        foodContainer.push_back(0.9375);
+        foodContainer.push_back(0.8125);
+
+        // pickup position
+        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize);
+        foodContainer.push_back((1 - i * (2 / w.size.y)));
+
+        // pickup color
+        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+  
+        // texture position
+        foodContainer.push_back(0.9375);
+        foodContainer.push_back(0.875);
+    }
+}
 
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		std::cout << "mouse button clicked\n";
-		glfwSetKeyCallback(window, key_callback);
-	}
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        std::cout << "mouse button clicked\n";
+        glfwSetKeyCallback(window, key_callback);
+    }
 
 }
 
 void textData(const std::string txt, const glm::vec2 button) {
-	int k = 0;
-	for (auto i : txt)
-	{
+    int k = 0;
+    for (auto i : txt)
+    {
+        // Position
+        txtPos.push_back(button.x + textCharacterSize * (k + 0));
+        txtPos.push_back(button.y - textCharacterSize);
+        // Color
+        txtPos.push_back(textColor.x);
+        txtPos.push_back(textColor.y);
+        txtPos.push_back(textColor.z);
+        // Texture Coordinates
+        txtPos.push_back(uv[i][1].x);
+        txtPos.push_back(uv[i][1].y);
+        
+        
 
-		// Position
-		txtPos.push_back(button.x + textCharacterSize * (k + 0));
-		txtPos.push_back(button.y - textCharacterSize);
-		// Color
-		txtPos.push_back(textColor.x);
-		txtPos.push_back(textColor.y);
-		txtPos.push_back(textColor.z);
-		// Texture Coordinates
-		txtPos.push_back(uv[i][1].x);
-		txtPos.push_back(uv[i][1].y);
-		
-		
-
-		txtPos.push_back(button.x + textCharacterSize * (k + 0));
-		txtPos.push_back(button.y);
-		txtPos.push_back(textColor.x);
-		txtPos.push_back(textColor.y);
-		txtPos.push_back(textColor.z);
-		txtPos.push_back(uv[i][0].x);
-		txtPos.push_back(uv[i][0].y);
-
-
-		txtPos.push_back(button.x + textCharacterSize *(k + 1));
-		txtPos.push_back(button.y - textCharacterSize);
-		txtPos.push_back(textColor.x);
-		txtPos.push_back(textColor.y);
-		txtPos.push_back(textColor.z);
-		txtPos.push_back(uv[i][3].x);
-		txtPos.push_back(uv[i][3].y);
-
-		
+        txtPos.push_back(button.x + textCharacterSize * (k + 0));
+        txtPos.push_back(button.y);
+        txtPos.push_back(textColor.x);
+        txtPos.push_back(textColor.y);
+        txtPos.push_back(textColor.z);
+        txtPos.push_back(uv[i][0].x);
+        txtPos.push_back(uv[i][0].y);
 
 
-		txtPos.push_back(button.x + textCharacterSize * (k + 1));
-		txtPos.push_back(button.y);
-		txtPos.push_back(textColor.x);
-		txtPos.push_back(textColor.y);
-		txtPos.push_back(textColor.z);
-		txtPos.push_back(uv[i][2].x);
-		txtPos.push_back(uv[i][2].y);
+        txtPos.push_back(button.x + textCharacterSize *(k + 1));
+        txtPos.push_back(button.y - textCharacterSize);
+        txtPos.push_back(textColor.x);
+        txtPos.push_back(textColor.y);
+        txtPos.push_back(textColor.z);
+        txtPos.push_back(uv[i][3].x);
+        txtPos.push_back(uv[i][3].y);
 
-		
-		k++;
+        
 
 
-	}
+        txtPos.push_back(button.x + textCharacterSize * (k + 1));
+        txtPos.push_back(button.y);
+        txtPos.push_back(textColor.x);
+        txtPos.push_back(textColor.y);
+        txtPos.push_back(textColor.z);
+        txtPos.push_back(uv[i][2].x);
+        txtPos.push_back(uv[i][2].y);
+
+        
+        k++;
+
+
+    }
 }
 
 void setupOpengl() {
@@ -208,48 +293,48 @@ void setupOpengl() {
     }
 
     shaderProgram = create_program("./shaders/vertex.vert", "./shaders/fragment.frag");
-	textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
-	fontTextureShaderProg = create_program("./shaders/vertexTexFont.vert", "./shaders/fragmentTexFont.frag");
+    textureShaderProg = create_program("./shaders/vertexTex.vert", "./shaders/fragmentTex.frag");
+    fontTextureShaderProg = create_program("./shaders/vertexTexFont.vert", "./shaders/fragmentTexFont.frag");
 
-	// Load texture
-	glGenTextures(2, texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+    // Load texture
+    glGenTextures(2, texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
 
-	int texWidth, texHeight, numComponents;
-	unsigned char* image;
-	stbi_set_flip_vertically_on_load(true);
-	image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	if (!image) {
-		std::cout << "Unable to load pacman texture\n";
-	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    stbi_image_free(image);
-	glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
-
-	
-
-	// font
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture[1]);
-
-	int fontTexWidth, fontTexHeight, numComponentsFont;
-	unsigned char* fontImage;
-	fontImage = stbi_load("./assets/font.png", &fontTexWidth, &fontTexHeight, &numComponentsFont, 4);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fontTexWidth, fontTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, fontImage);
-	if (!fontImage) {
-		std::cout << "Unable to load font image\n";
-	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    int texWidth, texHeight, numComponents;
+    unsigned char* image;
+    stbi_set_flip_vertically_on_load(true);
+    image = stbi_load("./assets/pacman.png", &texWidth, &texHeight, &numComponents, 4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    if (!image) {
+        std::cout << "Unable to load pacman texture\n";
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	stbi_image_free(fontImage);
-	glUniform1i(glGetUniformLocation(fontTextureShaderProg, "texFont"), 0);
+    stbi_image_free(image);
+    glUniform1i(glGetUniformLocation(textureShaderProg, "tex"), 0);
+
+    
+
+    // font
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture[1]);
+
+    int fontTexWidth, fontTexHeight, numComponentsFont;
+    unsigned char* fontImage;
+    fontImage = stbi_load("./assets/font.png", &fontTexWidth, &fontTexHeight, &numComponentsFont, 4);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fontTexWidth, fontTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, fontImage);
+    if (!fontImage) {
+        std::cout << "Unable to load font image\n";
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_image_free(fontImage);
+    glUniform1i(glGetUniformLocation(fontTextureShaderProg, "texFont"), 0);
 
     // Pacman text initial coordiantes
     pm.texCoord[0] = glm::vec2(0.02f, 0.03f);
@@ -310,7 +395,7 @@ void setupOpengl() {
     
 
 
-	glGenVertexArrays(1, &vaoMap);
+    glGenVertexArrays(1, &vaoMap);
     glBindVertexArray(vaoMap);
 
     glGenBuffers(NUM_BUFFERS, vbo);
@@ -342,117 +427,172 @@ void setupOpengl() {
     glVertexAttribPointer(VB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 
-	
+    
 
 
-	/* fonts vao and vbo  */
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 16; j++) {
-			uv[int((i * 16) + j)][0] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
-			uv[int((i * 16) + j)][1] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
-			uv[int((i * 16) + j)][2] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
-			uv[int((i * 16) + j)][3] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
-		}
-	}
+    /* fonts vao and vbo  */
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            uv[int((i * 16) + j)][0] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
+            uv[int((i * 16) + j)][1] = glm::vec2(j      * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
+            uv[int((i * 16) + j)][2] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - i) * (1.0f / 16.0f));
+            uv[int((i * 16) + j)][3] = glm::vec2((j + 1.0f) * (1.0f / 16.0f), (16.0f - (i + 1)) * (1.0f / 16.0f));
+        }
+    }
 
-	std::cout << playTextPos.x + textCharacterSize << '\n';
+    std::cout << playTextPos.x + textCharacterSize << '\n';
 
-	/*
-	
-	for (size_t i = 0; i < 256; i++)
-	{	
-		for (size_t j = 0; j < 4; j++)
-		{
-			std::cout << uv[i][j].x << "  " << uv[i][j].y << '\n';
-		}
-	}
-	*/
-	
-	textData(txt, playTextPos);
-	textData(txt2, exitTextPos);
+    /*
+    
+    for (size_t i = 0; i < 256; i++)
+    {   
+        for (size_t j = 0; j < 4; j++)
+        {
+            std::cout << uv[i][j].x << "  " << uv[i][j].y << '\n';
+        }
+    }
+    */
+    
+    textData(txt, playTextPos);
+    textData(txt2, exitTextPos);
 
-	glGenVertexArrays(1, &vaoFont);
-	glBindVertexArray(vaoFont);
+    glGenVertexArrays(1, &vaoFont);
+    glBindVertexArray(vaoFont);
 
-	glGenBuffers(1, &vboFont);
+    glGenBuffers(1, &vboFont);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboFont);
-
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * txtPos.size(), NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * txtPos.size(), &txtPos[0]);
-
-	glGenBuffers(1, &veoFont);
+    glBindBuffer(GL_ARRAY_BUFFER, vboFont);
 
 
-	GLuint order[] = {
-		0, 1, 2,
-		1, 2, 3,
-	
-		4, 5, 6,
-		5, 6, 7,
-		
-		8, 9, 10,
-		9, 10, 11,
-		
-		12, 13, 14,
-		13, 14, 15, 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * txtPos.size(), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * txtPos.size(), &txtPos[0]);
 
-		16, 17, 18,
-		17, 18, 19,
-
-		20, 21, 22,
-		21, 22, 23,
-
-		24, 25, 26,
-		25, 26, 27,
-
-		28, 29, 30,
-		29, 30, 31,
-
-		32, 33, 34,
-		33, 34, 35,
-
-		36, 37, 38,
-		37, 38, 39,
-
-		40, 41, 42,
-		41, 42, 43,
-
-		44, 45, 46,
-		45, 46, 47,
-
-	};
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 24, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
+    glGenBuffers(1, &veoFont);
 
 
-	glEnableVertexAttribArray(VB_POSITION);
+    GLuint order[] = {
+        0, 1, 2,
+        1, 2, 3,
+    
+        4, 5, 6,
+        5, 6, 7,
+        
+        8, 9, 10,
+        9, 10, 11,
+        
+        12, 13, 14,
+        13, 14, 15, 
 
-	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+        16, 17, 18,
+        17, 18, 19,
 
-	glEnableVertexAttribArray(VB_COLOR);
+        20, 21, 22,
+        21, 22, 23,
 
-	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
+        24, 25, 26,
+        25, 26, 27,
 
-	glEnableVertexAttribArray(VB_TEXTURE);
+        28, 29, 30,
+        29, 30, 31,
 
-	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
+        32, 33, 34,
+        33, 34, 35,
 
-	
+        36, 37, 38,
+        37, 38, 39,
 
+        40, 41, 42,
+        41, 42, 43,
+
+        44, 45, 46,
+        45, 46, 47,
+
+    };
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 3 * 24, NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(order), &order);
+
+
+    glEnableVertexAttribArray(VB_POSITION);
+
+    glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+
+    glEnableVertexAttribArray(VB_COLOR);
+
+    glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
+
+    glEnableVertexAttribArray(VB_TEXTURE);
+
+    glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
+
+    
+    /* FOOD */
+    glGenVertexArrays(1, &vaoFood);
+    glBindVertexArray(vaoFood);
+    glGenBuffers(1, &vboFood);
+    glBindBuffer(GL_ARRAY_BUFFER, vboFood);
+
+    // DATA
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * foodContainer.size(), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * foodContainer.size(), &foodContainer[0]);
+
+    // Indicies
+    glGenBuffers(1, &eboFood);
+
+    int* foodOrder = new int[foodContainer.size()];
+
+    for (int i = 0; i < foodContainer.size() / 6; ++i)
+    {
+        foodOrder[(i*6) + 0]= (i*4) + 0;
+        foodOrder[(i*6) + 1]= (i*4) + 1;
+        foodOrder[(i*6) + 2]= (i*4) + 2;
+
+        foodOrder[(i*6) + 3]= (i*4) + 1;
+        foodOrder[(i*6) + 4]= (i*4) + 2;
+        foodOrder[(i*6) + 5]= (i*4) + 3;
+    }
+
+    // Display order 
+    /*
+    for (int i = 0; i < foodContainer.size()/7; ++i)
+    {
+        std::cout << foodOrder[(i*6) + 0] << ", " << foodOrder[(i*6) + 1] << ", " << foodOrder[(i*6) + 2] << ", \n";
+        std::cout << foodOrder[(i*6) + 3] << ", " << foodOrder[(i*6) + 4] << ", " << foodOrder[(i*6) + 5] << ", \n\n";
+    }
+    */
+
+    // Display foodContainer
+    /*for (auto i: foodContainer)
+    {
+        std::cout << i <<" ";
+    }
+    */
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  (foodContainer.size() / 7) *6, NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(foodOrder), foodOrder );
+
+    glEnableVertexAttribArray(VB_POSITION);
+
+    glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+
+    glEnableVertexAttribArray(VB_COLOR);
+
+    glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
+
+    glEnableVertexAttribArray(VB_TEXTURE);
+
+    glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 
 }
 
 
 void dynamic_code(){
-	
-	/* PACMAN, GHOSTS and Special food*/
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	glActiveTexture(GL_TEXTURE0);
-	
+    
+    /* PACMAN, GHOSTS and Special food*/
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glActiveTexture(GL_TEXTURE0);
+    
     
     /* PACMAN, GHOSTS and Special food*/
     animate<PacMan>(pm, 2);
@@ -506,11 +646,11 @@ void dynamic_code(){
         13, 14, 15
     };
 
-	/* Pacman vao, vbo and veo init */
-	glGenVertexArrays(1, &vaoObj);
-	glBindVertexArray(vaoObj);
+    /* Pacman vao, vbo and veo init */
+    glGenVertexArrays(1, &vaoObj);
+    glBindVertexArray(vaoObj);
 
-	glGenBuffers(1, &vboObj);
+    glGenBuffers(1, &vboObj);
 
 
     glBindBuffer(GL_ARRAY_BUFFER, vboObj);
@@ -526,7 +666,7 @@ void dynamic_code(){
     
     // !!!! Make a buffer for VERTEX POSITIONS !!!!
     // Bind the buffer
-	glGenBuffers(1, &veoObj);
+    glGenBuffers(1, &veoObj);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
     
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (sizeof(GLuint) * 3) * ((ghostCount+1)*2), NULL, GL_STATIC_DRAW);
@@ -555,40 +695,47 @@ void dynamic_code(){
 
 
 void display() {
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	
-	/* Map */
-	glUseProgram(shaderProgram);
-	glBindVertexArray(vaoMap);
-	glDrawArrays(GL_TRIANGLES, 0, 6 * w.size.x * w.size.y);
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    
+    /* Map */
+    glUseProgram(shaderProgram);
+    glBindVertexArray(vaoMap);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * w.size.x * w.size.y);
 
-	/* Pacman and Ghost*/
-	glUseProgram(textureShaderProg);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(vaoObj);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
-	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, (const GLvoid*)0);
-	
-	if (pause) {
-		/* Font */
-		glUseProgram(fontTextureShaderProg);
-		glBindTexture(GL_TEXTURE_2D, texture[1]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindVertexArray(vaoFont);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
-		glDrawElements(GL_TRIANGLES, 72, GL_UNSIGNED_INT, (const GLvoid*)0);
-	}
+    /* Pacman and Ghost*/
+    glUseProgram(textureShaderProg);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(vaoObj);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoObj);
+    glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, (const GLvoid*)0);
+    
+    
 
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glUseProgram(0);
+    if (pause) {
+        /* Font */
+        glUseProgram(fontTextureShaderProg);
+        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindVertexArray(vaoFont);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veoFont);
+        glDrawElements(GL_TRIANGLES, 72, GL_UNSIGNED_INT, (const GLvoid*)0);
+    }
 
+    /* pickup */
+    glUseProgram(fontTextureShaderProg);
+    glBindTexture(GL_TEXTURE_2D, texture[1]);
+    glActiveTexture(GL_TEXTURE1);
+    glBindVertexArray(vaoFood);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
+    glDrawElements(GL_TRIANGLES, (foodContainer.size() / 7), GL_UNSIGNED_INT, (const GLvoid*)0);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -644,13 +791,13 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
         // The game should unpause
         pause = false;
     }
-	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-		shouldRun = false;
-	}
+    if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+        shouldRun = false;
+    }
 }
 
 
-	
+    
 
 int main() {
     // Read map data from file
@@ -662,10 +809,10 @@ int main() {
     // Register a keyboard event callback function
     glfwSetKeyCallback(window, key_callback);
 
-	// Register mouse button event callback function
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
+    // Register mouse button event callback function
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-	// Set pacman's direction to right
+    // Set pacman's direction to right
     pm.direction = glm::vec2(pm.speed, 0.0f);
 
     glm::vec4 coll;

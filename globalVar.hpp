@@ -13,6 +13,9 @@ const unsigned int WIDTH = 700; //768;
 // Score info 
 unsigned int score;
 
+// Food info
+std::vector<GLfloat> foodContainer;
+
 // World
 float dt = 0.0f;
 bool shouldRun = true;
@@ -35,11 +38,12 @@ const glm::vec2 playTextPos(-0.6f, 0.2f);
 const glm::vec2 exitTextPos(-0.6f, 0.0f);
 const glm::vec2 pauseTextPos(-1.0f, float(1 - textCharacterSize));
 const glm::vec3 textColor(1.0f, 0.7f, 0.30f);
-const std::string txt = "PLAY-P";
-const std::string txt2 = "EXIT-E";
+const std::string txt = ".";
+const std::string txt2 = "";
 std::vector<GLfloat> txtPos;
 glm::vec2 uv[256][4];
 
+std::string dotsy = ".";
 // Texture info
 const glm::vec2 textureSize = glm::vec2(0.13f, 0.215f);		// Size of each figure in the texture
 const glm::vec2 textureMargin = glm::vec2(0.015f, 0.03f);	// Margin around each figure.
