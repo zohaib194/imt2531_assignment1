@@ -25,6 +25,7 @@ GLuint vaoFont;
 GLuint vboFont;
 GLuint veoFont;
 
+
 // Global varaibles
 GLuint shaderProgram;
 GLuint textureShaderProg;
@@ -50,20 +51,21 @@ void readFile() {
         // read the map data from file
         for (int i = 0; i < w.size.y; i++) {
             for (int j = 0; j < w.size.x; j++) {
+    
                 inputFile >> x;
                 w.map.push_back(glm::vec3((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)), x));
 
                 // Find tile of type 2 and set it to pacmans starting pos
-                if (x == 2)
+                if (w.map[int((i * w.size.x) + j)].z == 2)
+                {
                     pm.position[0] = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
+                }
             }
             inputFile.ignore();
         }
     }
     inputFile.close();
 }
-
-
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -83,6 +85,7 @@ void textData(const std::string txt, const glm::vec2 button) {
 		txtPos.push_back(button.x + textCharacterSize * (k + 0));
 		txtPos.push_back(button.y - textCharacterSize);
 		// Color
+
 		txtPos.push_back(textColor.x);
 		txtPos.push_back(textColor.y);
 		txtPos.push_back(textColor.z);
@@ -649,9 +652,6 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
 	}
 }
 
-
-	
-
 int main() {
     // Read map data from file
     readFile();
@@ -693,8 +693,8 @@ int main() {
             coll = checkCollision<PacMan, int>(pm);
             /*if ((!coll.y) && pm.direction.y > 0 ||
                 (!coll.w) && pm.direction.y < 0 ||
-                (!coll.x) && pm.direction.x < 0 ||
-                (!coll.y) && pm.direction.x > 0)*/
+                (!coll.x) && pm.direction.x < 0 ||*/
+            if ((!coll.w) && pm.direction.x > 0)
             {
                 // Move pacman a little in that direction
                 pm.position[0] += pm.direction * dt;

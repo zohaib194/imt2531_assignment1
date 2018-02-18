@@ -1,6 +1,12 @@
 #include "globalVar.hpp"
 #include <iostream>
 
+#define UP 0
+#define DOWN 1
+#define LEFT 2
+#define RIGHT 3
+#define CHECK_FOR_WALL(X, Y) ((w.map[X].z == 1) ? ((Y < collTolerance) && (Y > -collTolerance)) : 1)
+
 // animate takes use a struct with texOffset and animationTime.
 // It takes the number of states in the texture for the struct in each direction.
 // frameCount should never be zero.
@@ -33,34 +39,6 @@ void animate(animatable &ani, int frameCount){
 	ani.texOffset.x = textureSize.x * state + textureMargin.x * state * 2; 
 }
 
-//template <class T>
-/*glm::vec4 collision(T obj)
-{
-    int i = (obj.position[0].y / (2 / w.size.y)) - 1, j = (obj.position[0].x / (2 / w.size.x)) + 1;
-    return glm::vec4((w.map[int((j)* w.size.x + (i - 1))].z == 1),
-        (w.map[int((j + 1) * w.size.x + (i))].z == 1),
-        (w.map[int((j)* w.size.x + (i + 1))].z == 1),
-        (w.map[int((j - 1) * w.size.x + (i))].z == 1));
-}*/
-
-
-
-
-
-
-
-
-
-
-// TODO: 
-// - use found i and j to look up actual world position within w.map, and check agains pacmans entire body collides with something, not just if the next tile is a wall
-// - Make function take in object to check agains, maybe also the xy size of the object
-
-
-
-
-
-
 /**
     This function does either collision with map (walls) isn't specified OR
     if it is given a object in "bObj" it does collition between "aObj" and "bObj"
@@ -73,19 +51,43 @@ void animate(animatable &ani, int frameCount){
 template<class A, class B>
 glm::vec4 checkCollision(const A aObj, const B bObj = NULL)
 {
+    // Find indexes
+    int i = int((-1 * w.size.y * aObj.position[0].y) / 2 + (w.size.y / 2)) % int(w.size.y),
+        j = int((w.size.x * aObj.position[0].x) / 2 + (w.size.x / 2)) % int(w.size.x);
+
+    // Finding map indexes to check against
+    int mapIndex[4] = { (((i + 1) * w.size.x) + j),
+                        (((i - 1) * w.size.x) + j),
+                        ((i * w.size.x) + (j - 1)),
+                        ((i * w.size.x) + (j + 1)) };
+
+        // Finding outer bounds of map tile THIS IS ONLY FOR ONE. Duplicate this for every checked tile 
+        int mapCollBox[4] = { w.map[mapIndex[UP]].y,
+                              w.map[mapIndex[DOWN]].y - (2 / w.size.y),
+                              w.map[mapIndex[LEFT]].x,
+                              w.map[mapIndex[RIGHT]].x + (2 / w.size.x) };
+
+        // Map pacman collition points
+        int pacCollBox[4] = { aObj.position[0].y,
+                              aObj.position[1].y,
+                              aObj.position[0].x,
+                              aObj.position[3].x };
+
+    // Map or object collision testing?
     if (bObj != NULL)
     {
-        return glm::vec4(1/*Coll state up*/, 
-                         1/*Coll state down*/, 
-                         1/*Coll state left*/, 
+        // Give current collision state for aObj and bObj
+        return glm::vec4(1/*Coll state up*/,
+                         1/*Coll state down*/,
+                         1/*Coll state left*/,
                          1/*Coll state right*/);
     }
     else
     {
-        int i = (aObj.position[0].y * (2 / w.size.y)) - 1, j = (aObj.position[0].x * (2 / w.size.x)) + 1;
-        return glm::vec4(1/*Coll state up*/,
-                         1/*Coll state down*/, 
-                         1/*Coll state left*/, 
-                         1);
+        // Give current collision state for aObj and map
+        return glm::vec4( CHECK_FOR_WALL(mapIndex[UP],    (pacCollBox[UP]    - mapCollBox[UP])),
+                          CHECK_FOR_WALL(mapIndex[DOWN],  (pacCollBox[DOWN]  - mapCollBox[DOWN])),
+                          CHECK_FOR_WALL(mapIndex[LEFT],  (pacCollBox[LEFT]  - mapCollBox[LEFT])),
+                          CHECK_FOR_WALL(mapIndex[RIGHT], (pacCollBox[RIGHT] - mapCollBox[RIGHT])));
     }
 }
