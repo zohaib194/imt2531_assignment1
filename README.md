@@ -1,7 +1,11 @@
-# Assignment Repository Skeleton
+# Assignment 1 - IMT2531
 
-Please modify the Readme file to your project specifics, including project name, involved group members (including mail contacts), as well as a version history.
-Project name : Pacman
+Project name: ![IMAGE ALT TEXT HERE](http://greatfrencharmy.e-monsite.com/medias/static/themes/smileys/10.png)
+
+Project participants:
+
+* Eldar Hauge Torkelsen (eldarht@stud.ntnu.no)
+* 
+* 
 
 
-In addition, use this file to describe the project functionality, provide setup instructions, and a brief overview on how to use it.
