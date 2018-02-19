@@ -42,6 +42,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void pause_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void placeFood(const std::string dab, float i, float j);
+void pacManCollision();
 
 void readFile() {
     std::ifstream inputFile;
@@ -501,47 +502,6 @@ void setupOpengl() {
     glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 
     
-    /* FOOD */
-    glGenVertexArrays(1, &vaoFood);
-    glBindVertexArray(vaoFood);
-    glGenBuffers(1, &vboFood);
-    glBindBuffer(GL_ARRAY_BUFFER, vboFood);
-
-    // DATA
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * foodContainer.size(), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * foodContainer.size(), &foodContainer[0]);
-
-    // Indicies
-    glGenBuffers(1, &eboFood);
-
-
-    for (int i = 0; i < (foodContainer.size() / 7); ++i)
-    {
-        foodOrder.push_back((i*4) + 0);
-        foodOrder.push_back((i*4) + 1);
-        foodOrder.push_back((i*4) + 2);
-
-        foodOrder.push_back((i*4) + 1);
-        foodOrder.push_back((i*4) + 2);
-        foodOrder.push_back((i*4) + 3);
-    }
-
-	
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * foodOrder.size(), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * foodOrder.size(), &foodOrder[0]);
-
-    glEnableVertexAttribArray(VB_POSITION);
-
-    glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
-
-    glEnableVertexAttribArray(VB_COLOR);
-
-    glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
-
-    glEnableVertexAttribArray(VB_TEXTURE);
-
-    glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 
 }
 
@@ -648,10 +608,72 @@ void dynamic_code(){
     glEnableVertexAttribArray(VB_TEXTURE);
     
     glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
+
+
+	for (int i = 0; i < (foodContainer.size() / 7); ++i)
+	{
+		foodOrder.push_back((i * 4) + 0);
+		foodOrder.push_back((i * 4) + 1);
+		foodOrder.push_back((i * 4) + 2);
+
+		foodOrder.push_back((i * 4) + 1);
+		foodOrder.push_back((i * 4) + 2);
+		foodOrder.push_back((i * 4) + 3);
+	}
+
+
+	//pacManCollision();
+
+
+	/* FOOD */
+	glGenVertexArrays(1, &vaoFood);
+	glBindVertexArray(vaoFood);
+	glGenBuffers(1, &vboFood);
+	glBindBuffer(GL_ARRAY_BUFFER, vboFood);
+	
+
+
+	// DATA
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * foodContainer.size(), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * foodContainer.size(), &foodContainer[0]);
+
+	// Indicies
+	glGenBuffers(1, &eboFood);
+
+
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboFood);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * foodOrder.size(), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * foodOrder.size(), &foodOrder[0]);
+
+	glEnableVertexAttribArray(VB_POSITION);
+
+	glVertexAttribPointer(VB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)0);
+
+	glEnableVertexAttribArray(VB_COLOR);
+
+	glVertexAttribPointer(VB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(2 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(VB_TEXTURE);
+
+	glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 }
 
 
-
+void pacManCollision() {
+	for (size_t i = 0; i < foodContainer.size() / 7; ++i)
+	{
+		if (pm.position[1].x >= foodContainer[(i + 7) + 0] && pm.position[1].y >= foodContainer[(i + 7) + 1] &&
+			pm.position[0].x >= foodContainer[(i + 7) + 0] && pm.position[0].y >= foodContainer[(i + 7) + 1] && 
+			pm.position[3].x <= foodContainer[(i + 7) + 0] && pm.position[3].y < foodContainer[(i + 7) + 1] &&
+			pm.position[2].x <= foodContainer[(i + 7) + 0] && pm.position[2].y < foodContainer[(i + 7) + 1]) {
+			
+			foodContainer.erase(foodContainer.begin() + i, foodContainer.begin() + (i + 7));
+			//foodOrder.erase(foodOrder.begin() + i, foodOrder.begin() + i + 6);
+		}
+		
+	}
+}
 
 void display() {
     
