@@ -6,6 +6,6 @@ Project participants:
 
 * Eldar Hauge Torkelsen (eldarht@stud.ntnu.no)
 * Zohaib Butt (zohaibb@stud.ntnu.no)
-* 
+* Kent W. Holt (kentwh@stud.ntnu.no) 
 
 
