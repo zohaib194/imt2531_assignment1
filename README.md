@@ -5,7 +5,7 @@ Project name: ![IMAGE ALT TEXT HERE](http://greatfrencharmy.e-monsite.com/medias
 Project participants:
 
 * Eldar Hauge Torkelsen (eldarht@stud.ntnu.no)
-* 
+* Zohaib Butt (zohaibb@stud.ntnu.no)
 * 
 
 
