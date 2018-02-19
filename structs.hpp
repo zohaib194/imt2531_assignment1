@@ -6,8 +6,8 @@
 struct PacMan
 {
     glm::vec2 position[4]; 
-    glm::vec2 direction;
-    float speed = 0.10f;
+    glm::vec2 direction;    //should be unit vector
+    float speed = 0.1f;
     glm::vec2 texCoord[4];
     glm::vec2 texOffset = glm::vec2(0.0f, 0.0f);
     double animationTime = 0.0;
@@ -17,6 +17,7 @@ struct Ghost
 {
     glm::vec2 position[4]; 
     glm::vec2 direction;
+    float speed = 0.1f;
     glm::vec2 texCoord[4];
     glm::vec2 texOffset = glm::vec2(0.0f, 0.0f);
     double animationTime = 0.0;

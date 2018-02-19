@@ -24,6 +24,7 @@ GLuint vaoFont;
 GLuint vboFont;
 GLuint veoFont;
 
+
 // Global varaibles
 GLuint shaderProgram;
 GLuint textureShaderProg;
@@ -54,18 +55,22 @@ void readFile() {
         // read the map data from file
         for (int i = 0; i < w.size.y; i++) {
             for (int j = 0; j < w.size.x; j++) {
+    
                 inputFile >> x;
                 w.map.push_back(glm::vec3((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)), x));
 
                 if (x == 0)
                 {
-                    placeFood(dotsy,i, j);
+ 
+                    placeFood(dotsy, i, j);
 
                 }
 
                 // Find tile of type 2 and set it to pacmans starting pos
-                if (x == 2)
+                if (w.map[int((i * w.size.x) + j)].z == 2)
+                {
                     pm.position[0] = glm::vec2((j * (2 / w.size.x) - 1), (1 - i * (2 / w.size.y)));
+                }
             }
             inputFile.ignore();
         }
@@ -74,54 +79,51 @@ void readFile() {
 }
 
 void placeFood(const std::string dab, int i, int j){
-    for (auto dot : dab)
-    {
-        // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1));
-        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
+ 
+    // pickup position
+    foodContainer.push_back((j * (2 / w.size.x) - 1));
+    foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
 
-        // pickup color
-        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+    // pickup color
+    foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
 
-        // texture position
-        foodContainer.push_back(0.875f);
-        foodContainer.push_back(0.8125f);
+    // texture position
+    foodContainer.push_back(0.875f);
+    foodContainer.push_back(0.8125f);
 
-        // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1));
-        foodContainer.push_back((1 - i * (2 / w.size.y)) + textCharacterSize/2.0f);
+    // pickup position
+    foodContainer.push_back((j * (2 / w.size.x) - 1));
+    foodContainer.push_back((1 - i * (2 / w.size.y)) + textCharacterSize/2.0f);
 
-        // pickup color
-        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
-   
-        // texture position
-        foodContainer.push_back(0.875f);
-        foodContainer.push_back(0.875f);
+    // pickup color
+    foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
 
-        // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
-        foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
+    // texture position
+    foodContainer.push_back(0.875f);
+    foodContainer.push_back(0.875f);
 
-        // pickup color
-        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+    // pickup position
+    foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
+    foodContainer.push_back((1 - i * (2 / w.size.y)) - textCharacterSize/2.0f);
 
-        // texture position
-        foodContainer.push_back(0.9375);
-        foodContainer.push_back(0.8125);
+    // pickup color
+    foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
 
-        // pickup position
-        foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
-        foodContainer.push_back((1 - i * (2 / w.size.y)));
+    // texture position
+    foodContainer.push_back(0.9375);
+    foodContainer.push_back(0.8125);
 
-        // pickup color
-        foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
-  
-        // texture position
-        foodContainer.push_back(0.9375);
-        foodContainer.push_back(0.875);
-    }
+    // pickup position
+    foodContainer.push_back((j * (2 / w.size.x) - 1) + textCharacterSize/2.0f);
+    foodContainer.push_back((1 - i * (2 / w.size.y)));
+
+    // pickup color
+    foodContainer.push_back(1); foodContainer.push_back(1); foodContainer.push_back(0);
+
+    // texture position
+    foodContainer.push_back(0.9375);
+    foodContainer.push_back(0.875);
 }
-
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -166,8 +168,6 @@ void textData(const std::string txt, const glm::vec2 button) {
         txtPos.push_back(uv[i][3].x);
         txtPos.push_back(uv[i][3].y);
 
-        
-
 
         txtPos.push_back(button.x + textCharacterSize * (k + 1));
         txtPos.push_back(button.y);
@@ -179,8 +179,6 @@ void textData(const std::string txt, const glm::vec2 button) {
 
         
         k++;
-
-
     }
 }
 
@@ -328,19 +326,19 @@ void setupOpengl() {
 
         switch(i%4){
             case 0:
-                gh[i].direction = glm::vec2(0.0f, 0.1f);
+                gh[i].direction = glm::vec2(1.0f, 0.0f);
                 break;
 
             case 1:
-                gh[i].direction = glm::vec2(0.1f, 0.0f);
+                gh[i].direction = glm::vec2(-1.0f, 0.0f);
                 break;
 
             case 2:
-                gh[i].direction = glm::vec2(0.0f, -0.1f);
+                gh[i].direction = glm::vec2(0.0f, 1.0f);
                 break;
 
             case 3:
-                gh[i].direction = glm::vec2(-0.1f, 0.0f);
+                gh[i].direction = glm::vec2(0.0f, -1.0f);
                 break;
         }
     }
@@ -556,6 +554,7 @@ void setupOpengl() {
 
     glVertexAttribPointer(VB_TEXTURE, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 7, (void *)(5 * sizeof(GLfloat)));
 
+    std::cout << " " << foodCount << std::endl;
 }
 
 
@@ -571,6 +570,7 @@ void dynamic_code(){
 
     for (int i = 0; i < ghostCount; ++i)
     {
+        rotate<Ghost>(gh[i]);
         animate<Ghost>(gh[i], 1);
     }
     
@@ -712,36 +712,36 @@ void display() {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    glm::vec4 coll = collision<PacMan>(pm);
+    //glm::vec4 coll = checkCollision<PacMan>(pm);
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         shouldRun = false;
 
     // Can pacman move up AND was UP or W pressed?
-    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && (!coll.y))
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP))// && (!coll.y))
     {
         // Set direction to up
-        pm.direction = glm::vec2(0.0f, pm.speed);
+        pm.direction = glm::vec2(0.0f, 1.0f);
     }
 
     // Can pacman move down AND was DOWN or S pressed?
-    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && (!coll.w))
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) // && (!coll.w))
     {
         // Set direction to down
-        pm.direction = glm::vec2(0.0f, -pm.speed);
+        pm.direction = glm::vec2(0.0f, -1.0f);
     }
 
     // Can pacman move left AND was LEFT or A pressed?
-    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && (!coll.x))
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT)) // && (!coll.x))
     {
         // Set direction to left
-        pm.direction = glm::vec2(-pm.speed, 0.0f);
+        pm.direction = glm::vec2(-1.0f, 0.0f);
     }
 
     // Can pacman move right AND was RIGHT or D pressed?
-    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && (!coll.z))
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT)) // && (!coll.z))
     {
         // Set direction to right
-        pm.direction = glm::vec2(pm.speed, 0.0f);
+        pm.direction = glm::vec2(1.0f, 0.0f);
     }
     else if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
@@ -768,9 +768,6 @@ void pause_callback(GLFWwindow* window, int key, int scancode, int action, int m
     }
 }
 
-
-    
-
 int main() {
     // Read map data from file
     readFile();
@@ -785,7 +782,7 @@ int main() {
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // Set pacman's direction to right
-    pm.direction = glm::vec2(pm.speed, 0.0f);
+    pm.direction = glm::vec2(1.0f, 0.0f);
 
     glm::vec4 coll;
 
@@ -809,29 +806,28 @@ int main() {
         // Should I pause
         if (!pause)
         {
-            coll = collision<PacMan>(pm);
-            if ((!coll.y) && pm.direction.y > 0 ||
+            //coll = checkCollision<PacMan, int>(pm);
+            /*if ((!coll.y) && pm.direction.y > 0 ||
                 (!coll.w) && pm.direction.y < 0 ||
-                (!coll.x) && pm.direction.x < 0 ||
-                (!coll.y) && pm.direction.x > 0)
+                (!coll.x) && pm.direction.x < 0 ||*/
+            if (/*(!coll.w) && pm.direction.x > 0*/ true)
             {
+                // update animation direction
+                rotate<PacMan>(pm);
                 // Move pacman a little in that direction
-                pm.position[0] += pm.direction * dt;
-                pm.position[1] += pm.direction * dt;
-                pm.position[2] += pm.direction * dt;
-                pm.position[3] += pm.direction * dt;
+                pm.position[0] += pm.direction * pm.speed * dt;
+                pm.position[1] += pm.direction * pm.speed * dt;
+                pm.position[2] += pm.direction * pm.speed * dt;
+                pm.position[3] += pm.direction * pm.speed * dt;
             }
 
             for (int i = 0; i < ghostCount; ++i)
             {
-
-                gh[i].position[0] += gh[i].direction * dt;
-                gh[i].position[1] += gh[i].direction * dt;
-                gh[i].position[2] += gh[i].direction * dt;
-                gh[i].position[3] += gh[i].direction * dt;
+                gh[i].position[0] += gh[i].direction  * gh[i].speed * dt;
+                gh[i].position[1] += gh[i].direction  * gh[i].speed * dt;
+                gh[i].position[2] += gh[i].direction  * gh[i].speed * dt;
+                gh[i].position[3] += gh[i].direction  * gh[i].speed * dt;
             }
-
-            // TODO: add ghost movement update here as well (copy and modify code above)
         }
 
         // Display everything
